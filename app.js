@@ -107,6 +107,72 @@ function histCommit(used){
   ls(HIST_KEY,o);
 }
 
+// ===== PALABRA CLAVE PROPIA («Escribe la tuya») =====
+// Una sola palabra, mayúsculas, solo letras (con Ñ y tildes), máximo 15. Lo que se escribe solo entra por value/textContent o por esc().
+const KW_MAX=15;
+const kwClean=v=>String(v==null?"":v).normalize("NFC").toUpperCase().replace(/[^\p{Script=Latin}]/gu,"").slice(0,KW_MAX);
+const KW_GENERICAS=["info","informacion","mas","quiero","si","yo","ok","precio","link"];
+const KW_RIESGO=["dinero","ganar","extra","sueldo","negocio","trabajo","casa","adelgazar","kilos","dieta","detox","gratis","oferta","descuento"];
+const KW_EJ_GENERICA="Es muy genérica: elige una palabra concreta que diga lo que van a recibir (NOCHE, REGALOS, ZOOM…).";
+// build(k) -> lista de textos (CTA, cierre, pantalla…) tal como saldrían con la palabra k. Avisa, nunca bloquea.
+function kwIssues(kw,build){
+  const out=[];if(!kw)return out;
+  const n=norm(kw),mot=[];
+  const base=new Set(scanMeta(build("NOCHE").join("\n")).map(h=>h.t)); // lo que ya dice la plantilla sin la palabra no se le achaca a ella
+  scanMeta(kw).concat(scanMeta(build(kw).join("\n")).filter(h=>!base.has(h.t))).forEach(h=>{if(mot.indexOf(h.t)<0)mot.push(h.t)});
+  if(mot.length)out.push({k:"meta",mot});
+  else if(KW_RIESGO.some(w=>n===w||(w.length>=6&&n.indexOf(w)===0)))out.push({k:"riesgo"});
+  if(KW_GENERICAS.indexOf(n)>=0)out.push({k:"generica"});
+  return out;
+}
+function kwWarnHtml(iss,plat){
+  if(!iss||!iss.length)return "";
+  const red=plat==="tiktok"?"TikTok":"Meta";
+  let h="",link=false;
+  iss.forEach(i=>{
+    if(i.k==="meta"){link=true;h+='<p class="kwm kwm-no"><b>Ojo.</b> '+esc("Esta palabra puede saltarse las normas de "+red+": "+i.mot.join("; ")+". Prueba con otra.")+'</p>'}
+    else if(i.k==="riesgo"){link=true;h+='<p class="kwm kwm-no"><b>Riesgo.</b> '+esc("Es una palabra de riesgo: suele relacionarse con dinero, cuerpo o promesas y puede hacer que revisen tu publicación. Prueba con otra.")+'</p>'}
+    else if(i.k==="generica")h+='<p class="kwm"><b>Consejo.</b> '+esc(KW_EJ_GENERICA)+'</p>';
+  });
+  if(link)h+='<button type="button" class="linkb" data-tab="normas">Ver lo que no se dice</button>';
+  return h;
+}
+// Caja «chips + Escribe la tuya». tool identifica la herramienta; chips: lista de palabras; cur: palabra activa; own: texto propio actual.
+function kwBoxHtml(tool,label,chips,cur,own,warn,ph){
+  const t=esc(tool);
+  return '<div class="kwbox"><div class="kwlbl">'+esc(label)+'</div><div class="kws">'+chips.map(k=>'<button type="button" class="chip'+(cur===k?" on":"")+'" data-kwt="'+t+'" data-kwv="'+esc(k)+'" aria-pressed="'+(cur===k)+'">'+esc(k)+'</button>').join("")+'</div>'
+  +'<label class="kwown">Escribe la tuya<input type="text" class="kwin" data-kwt="'+t+'" value="'+esc(own||"")+'" placeholder="'+esc(ph||"Por ejemplo: NOCHE")+'" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="kwh_'+t+'"></label>'
+  +'<small class="mut" id="kwh_'+t+'">Una sola palabra, sin espacios ni símbolos. Nunca pongas un enlace. Si es una de las sugeridas, tócala.</small>'
+  +'<div class="kwwarn" id="kwwarn_'+t+'" role="status" aria-live="polite">'+(warn||"")+'</div></div>';
+}
+const KWT={}; // herramienta -> función(kw, esPropia) que guarda la palabra y repinta lo que depende de ella
+function kwSyncChips(box,kw){
+  if(!box)return;
+  box.querySelectorAll("button[data-kwt]").forEach(b=>{const on=b.dataset.kwv===kw;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on?"true":"false")});
+}
+function kwShowWarn(tool,iss,plat){const w=document.getElementById("kwwarn_"+tool);if(w)w.innerHTML=kwWarnHtml(iss,plat)}
+// sustituye una palabra clave por otra en un texto ya montado (solo palabra completa)
+function kwSwap(text,from,to){
+  if(!from||from===to)return String(text);
+  const re=new RegExp("(?<![\\p{L}])"+from.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(?![\\p{L}])","gu");
+  return String(text).replace(re,()=>to);
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("button[data-kwt]");if(!b)return;
+  const f=KWT[b.dataset.kwt];if(!f)return;
+  const box=b.closest(".kwbox"),inp=box&&box.querySelector(".kwin");
+  if(inp)inp.value=""; // tocar una sugerencia borra la palabra propia
+  kwSyncChips(box,b.dataset.kwv);
+  f(b.dataset.kwv,false);
+});
+document.addEventListener("input",e=>{
+  const el=e.target;if(!el||!el.classList||!el.classList.contains("kwin"))return;
+  const f=KWT[el.dataset.kwt];if(!f)return;
+  const v=kwClean(el.value);if(el.value!==v)el.value=v;
+  kwSyncChips(el.closest(".kwbox"),v);
+  f(v,true);
+});
+
 // ===== revisor Meta =====
 function scanMeta(text){
   const n=norm(text),hits=[];
@@ -296,12 +362,13 @@ function pickProduct(s,prod){
 // f: {obj,sit,prod,tono,nivel,len,kw,fecha,dias,nonce}. av: conjuntos a evitar {g,c,f} (opcional).
 function genSeq(f,av){
   av=av||{g:new Set(),c:new Set(),f:new Set()};
+  const av0={g:new Set(av.g),c:new Set(av.c),f:new Set(av.f)}; // se guarda para regenerar con otra palabra clave sin cambiar nada más
   av={g:new Set(av.g),c:new Set(av.c),f:new Set(av.f)};
   const used={g:[],c:[],f:[]};
   const O=DB.OBJS[f.obj],via=viaOf(f.obj);
   let s=SIT[f.sit];
   if(!s||s.via!==via){const L=sitsVia(via);s=L[hash([f.obj,f.sit,f.nonce].join("|"))%L.length]}
-  const seed=hash([f.obj,s.id,f.prod,f.tono,f.nivel,f.len,f.kw,f.fecha,f.dias,f.nonce].join("|"));
+  const seed=hash([f.obj,s.id,f.prod,f.tono,f.nivel,f.len,f.fecha,f.dias,f.nonce].join("|")); // la palabra clave NO entra en la semilla: cambiarla solo cambia la palabra
   R=mulberry(seed);
   const pr=pickProduct(s,f.prod);
   const gama=via==="proyecto"?"equipo":((!f.prod||f.prod==="auto")&&(s.gamas||[]).length===1&&s.gamas[0]==="cat"?"cat":pr.gama);
@@ -309,10 +376,15 @@ function genSeq(f,av){
   const nutri=gama==="nutri"||(s.gamas||[]).indexOf("nutri")>=0||s.grupo==="Nutrición y bienestar";
   const kw=f.kw||kwOptions(f.obj,s.id)[0];
   const guia=GUIA_KW[via+"|"+kw]||guiaOf(s);
-  const roles=(O.seq[f.len]||O.seq[5]).slice();
+  // 2 stories: la 1 une el gancho con una línea de historia; la 2 es la última de la secuencia de 3 (en las de CTA, la llamada final)
+  const two=+f.len===2,seq3=O.seq[3];
+  const roles=two?[seq3[0],seq3[seq3.length-1]]:(O.seq[f.len]||O.seq[5]).slice();
+  const histo=two&&DB.tiktok&&DB.tiktok.stories&&DB.tiktok.stories.sit&&DB.tiktok.stories.sit[s.id]?DB.tiktok.stories.sit[s.id].historia:"";
   const ctx={s,via,p:G,gama,nutri,prod:pr,pn:pr?pr.nombre_corto:"",tono:f.tono,obj:f.obj,kw,fecha:f.fecha,dias:+f.dias||7,pasos:0,tips:shuffle(G.tips),
     guia,rec:recursoTxt(guia,s),habs:shuffle(DB.HABITOS).slice(0,+f.dias||7)};
-  ctx.hook=pickAv(s.ganchos,av,x=>x.t,"g",used).t;
+  let gl=s.ganchos;
+  if(two&&histo){const ok=gl.filter(g=>(g.t+" "+histo).length<=230);if(ok.length)gl=ok}
+  ctx.hook=pickAv(gl,av,x=>x.t,"g",used).t;
   ctx.ob=pick(DB.objeciones[via]);
   // las frases del banco se eligen solo cuando un rol las necesita (y se recuerdan para no repetirlas)
   const memo={};
@@ -333,8 +405,16 @@ function genSeq(f,av){
     out.push({rol:r,rolN:D.n,fmt:fm,t:b.t,g:b.g,d:b.d,st:b.st,dur:D.dur,pal:D.pal,zona:D.zona});
   });
   out[0].pal="Primera semana";
+  if(two){ // gancho + historia en una sola story: cubre también la palanca de retención
+    out[0].pal2="Retención";
+    const g0=roles[0]==="gancho",line=g0?histo:(ctx.ob&&ctx.ob.story)||histo;
+    if(line&&(out[0].t+" "+(g0?"":out[0].d+" ")+line).length<=230){ // gancho (o duda) + historia: como mucho 230 caracteres entre lo que se ve y lo que se dice
+      if(g0){out[0].g+=" Después, sin cortar, cuenta tu historia.";out[0].d=noDot(line)+"."}
+      else out[0].d+=" "+line;
+    }
+  }
   if(!out.some(x=>x.pal==="Respuestas")){const L=out[out.length-1];L.pal="Respuestas";L.d+=" Termina invitando a que te cuenten su experiencia por mensaje.";L.st=L.st==="Ninguno"?"Caja de preguntas (opcional)":L.st}
-  return {f:Object.assign({},f),via,obj:O,sit:s,prod:pr,gama,nutri,aviso:nutri?DB.gamas.nutri.aviso:"",guia,ctx,stories:out,hook:ctx.hook,kw,used};
+  return {f:Object.assign({},f),via,obj:O,sit:s,prod:pr,gama,nutri,aviso:nutri?DB.gamas.nutri.aviso:"",guia,ctx,stories:out,hook:ctx.hook,kw,used,av0};
 }
 
 // ===== revisión de calidad del curso (sobre una secuencia generada) =====
@@ -346,9 +426,9 @@ function checkSeq(res){
   add(!rep,"No se repite el mismo formato dos veces seguidas","Mezcla A, B, C y D para que la gente no se aburra.");
   let mx=0,run=0;st.forEach(x=>{run=x.rol==="paso"?run+1:0;mx=Math.max(mx,run)});
   add(mx<=3,"El tutorial no pasa de 3 stories seguidas","Más de 3 pasos seguidos y se pierde la gente.");
-  const pals=new Set(st.map(x=>x.pal));
+  const pals=new Set(st.map(x=>x.pal).concat(st.map(x=>x.pal2).filter(Boolean)));
   ["Retención","Respuestas","Primera semana"].forEach(pl=>add(pals.has(pl),"Palanca: "+pl.toLowerCase()+" cubierta","Cada secuencia debería trabajar las tres palancas."));
-  add(st.length>=3&&st.length<=8,"Longitud entre 3 y 8 stories","Entre 3 y 8. Con 3 tienes la versión mínima; con 4 a 5 es lo más completo para empezar.");
+  add(st.length>=2&&st.length<=8,"Longitud entre 2 y 8 stories","Entre 2 y 8. Con 2 tienes la versión exprés (gancho con historia y llamada final); con 3, la mínima completa; con 4 a 5 es lo más completo para empezar.");
   let a2=0;st.forEach((x,i)=>{if(x.fmt==="A"&&i&&st[i-1].fmt==="A"&&i>1&&st[i-2].fmt==="A")a2++});
   add(a2===0,"No hay tres vídeos a cámara seguidos","Máximo dos vídeos a cámara seguidos.");
   if(O.cta){const r=ctaCheck(res.ctx.ctaD,{deseo:res.sit.deseo,dolor:res.sit.dolor,recurso:res.ctx.rec});add(r.ok,"El CTA tiene beneficio, promesa concreta y acción","Beneficio tangible + promesa concreta del recurso + acción específica (la palabra clave).");add(st[st.length-1].rol==="cta","El CTA va al final, no al principio","El CTA cierra la secuencia.")}
@@ -370,7 +450,7 @@ function scriptText(res){
 const PERF=ls("ft_perfil")||{};
 const SIT0={clientas:sitsVia("clientas")[0].id,proyecto:sitsVia("proyecto")[0].id}; // situación por defecto de cada vía
 const S={tab:"home",res:null,
- f:{via:"clientas",obj:"valor",sit:SIT0.clientas,prod:"auto",tono:PERF.tono||"cercano",nivel:PERF.nivel||"empiezo",len:5,kw:"",fecha:"",dias:7,nonce:0},
+ f:{via:"clientas",obj:"valor",sit:SIT0.clientas,prod:"auto",tono:PERF.tono||"cercano",nivel:PERF.nivel||"empiezo",len:5,kw:"",kwc:"",fecha:"",dias:7,nonce:0},
  svia:"clientas",gtab:{},gx:"",gq:""};
 
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("on"),1800)}
@@ -389,7 +469,7 @@ function mock(x,kw){
 
 // ===== tarjeta de story =====
 function storyHtml(x,i,kw){
-  return '<article class="story"><div class="sn"><b>'+(i+1)+'</b><small>'+esc(x.dur)+'</small></div><div class="sb"><header><h4>'+esc(x.rolN)+'</h4><span class="tag f'+x.fmt+'" title="'+esc(DB.FMT[x.fmt].que)+'">Formato '+x.fmt+'</span><span class="tag pal">'+esc(x.pal)+'</span></header>'
+  return '<article class="story"><div class="sn"><b>'+(i+1)+'</b><small>'+esc(x.dur)+'</small></div><div class="sb"><header><h4>'+esc(x.rolN)+'</h4><span class="tag f'+x.fmt+'" title="'+esc(DB.FMT[x.fmt].que)+'">Formato '+x.fmt+'</span><span class="tag pal">'+esc(x.pal)+'</span>'+(x.pal2?'<span class="tag pal">'+esc(x.pal2)+'</span>':'')+'</header>'
   +'<dl><dt>En pantalla</dt><dd class="scr">'+esc(x.t).replace(/\n/g,"<br>")+'</dd><dt>Qué grabar</dt><dd>'+esc(x.g)+'</dd><dt>Qué decir</dt><dd>'+esc(x.d)+'</dd><dt>Dónde ponerlo</dt><dd>'+esc(x.zona)+'</dd>'+(x.st!=="Ninguno"?'<dt>Sticker</dt><dd>'+esc(x.st)+'</dd>':'')+'</dl>'
   +'<div class="fh">'+esc(DB.FMT[x.fmt].n)+': '+esc(noDot(DB.FMT[x.fmt].que.split(". ")[0]))+'.</div>'
   +'<button class="mini" data-copy="'+esc(x.t.replace(/\n/g," / "))+'">Copiar texto de pantalla</button></div>'+mock(x,kw)+'</article>';
@@ -472,9 +552,9 @@ function viewCrear(){
   +'<div class="info"><b>'+esc(O.corto)+'.</b> '+esc(O.que)+' <span class="mut">Cuándo: '+esc(O.cuando)+'</span></div>';
   h+='<div class="grid3">'+(proy?'':'<label>Producto'+sel("f_prod",[["auto","Según la situación"]].concat(["piel","maq","cabello","perfume","nutri","cuidado"].map(k=>[k,DB.gamas[k].n])),f.prod)+'</label>')
   +'<label>Tono'+sel("f_tono",Object.keys(DB.TONOS).map(k=>[k,DB.TONOS[k].n]),f.tono)+'</label>'
-  +'<label>Número de stories'+sel("f_len",[3,4,5,6,7,8].map(n=>[n,n+(n===defLen(f.nivel)?" (recomendado)":n===3?" (versión corta)":"")]),f.len)+'</label></div>';
+  +'<label>Número de stories'+sel("f_len",[2,3,4,5,6,7,8].map(n=>[n,n+(n===defLen(f.nivel)?" (recomendado)":n===3?" (versión corta)":n===2?" (versión exprés)":"")]),f.len)+'</label></div>';
   h+='<fieldset><legend>Tu nivel</legend><div class="radios">'+[["empiezo","Empiezo hoy","Sin experiencia: fotos y texto, casi sin hablar."],["suelto","Me suelto","Ya publicas algo y te atreves a hablar a cámara."],["pro","Ya publico a diario","Mezclas vídeo, tutorial y prueba."]].map(r=>'<label class="rad"><input type="radio" name="f_nivel" value="'+r[0]+'"'+(f.nivel===r[0]?" checked":"")+'><span><b>'+r[1]+'</b><small>'+r[2]+'</small></span></label>').join("")+'</div></fieldset>';
-  if(O.cta)h+='<div class="grid2"><label>Palabra clave del CTA<input id="f_kw" value="'+esc(f.kw)+'" placeholder="'+esc(kws[0])+'"><span class="kws">'+kws.map(k=>'<button type="button" class="chip'+(f.kw===k?" on":"")+'" data-kw="'+esc(k)+'">'+esc(k)+'</button>').join("")+'</span><small class="mut">Toca una sugerencia o escribe la tuya: una sola palabra en mayúsculas. Nunca pongas un enlace.</small></label>'
+  if(O.cta)h+='<div class="grid2">'+kwBoxHtml("ig","Palabra clave del CTA",kws,f.kw,f.kwc,kwWarnHtml(f.kwc?igKwIssues(f.kwc):[],"meta"),kws[0])
   +(needsDias?'<label>Duración del reto'+sel("f_dias",[3,5,7,10].map(n=>[n,n+" días"]),f.dias)+'</label>':'')
   +(needsDate?'<label>Fecha límite real<input type="date" id="f_fecha" value="'+esc(f.fecha)+'"><small class="mut">Solo si es verdadera. No inventes urgencia.</small></label>':'')+'</div>';
   h+='<div class="acts"><button class="btn big" data-act="gen">Generar secuencia</button></div></section>';
@@ -488,14 +568,26 @@ function setVia(v){
   if(viaOf(f.obj)!==v)f.obj=objDefault(v);
   f.via=v;
   if(!SIT[f.sit]||SIT[f.sit].via!==v)f.sit=SIT0[v];
-  f.kw="";S.res=null;
+  f.kw="";f.kwc="";S.res=null;
 }
 function readCrear(){
   const f=S.f,g=id=>{const e=$("#"+id);return e?e.value:null};
   if(g("f_obj"))f.obj=g("f_obj");f.via=viaOf(f.obj);if(g("f_sit"))f.sit=g("f_sit");if(g("f_prod"))f.prod=g("f_prod");if(g("f_tono"))f.tono=g("f_tono");
-  if(g("f_len"))f.len=+g("f_len");if(g("f_kw")!==null)f.kw=norm(g("f_kw")).toUpperCase().replace(/[^A-Z0-9]/g,"");if(g("f_fecha")!==null)f.fecha=g("f_fecha");if(g("f_dias"))f.dias=+g("f_dias");
+  if(g("f_len"))f.len=+g("f_len");if(g("f_fecha")!==null)f.fecha=g("f_fecha");if(g("f_dias"))f.dias=+g("f_dias");
   const n=document.querySelector('input[name=f_nivel]:checked');if(n)f.nivel=n.value;
 }
+
+// palabra clave de las stories de Instagram: texto de toda la secuencia con la palabra k (para avisar sin bloquear)
+function igKwIssues(k){
+  const f=Object.assign({},S.res?S.res.f:S.f,{kw:k}),av=S.res?S.res.av0:histSets();
+  return kwIssues(k,x=>{const r=genSeq(Object.assign({},f,{kw:x}),av);return r.stories.map(t=>[t.t,t.g,t.d,t.st].join(" ")).concat(r.ctx.ctaD||"")});
+}
+// «Escribe la tuya» y sugerencias: la palabra se aplica al momento a la secuencia ya generada (misma secuencia, otra palabra)
+KWT.ig=function(kw,own){
+  const f=S.f;f.kw=kw;f.kwc=own?kw:"";
+  if(S.res){S.res=genSeq(Object.assign({},S.res.f,{kw}),S.res.av0);const o=$("#out");if(o)o.innerHTML=seqHtml(S.res)}
+  kwShowWarn("ig",own&&kw?igKwIssues(kw):[],"meta");
+};
 
 // ===== pestaña SITUACIONES =====
 const hookList=s=>'<ul class="hooks">'+s.ganchos.map(g=>'<li><span class="tag">'+esc(cap(g.tipo))+'</span> '+esc(g.t)+' <button class="mini" data-copy="'+esc(g.t)+'">Copiar</button></li>').join("")+'</ul>';
@@ -637,7 +729,6 @@ document.addEventListener("click",e=>{
   if(d.via){readCrear();setVia(d.via);render(true);return}
   if(d.gz){S.gz=d.gz;render(true);return}
   if(d.rt){S.rtab=d.rt;const x=$("#rv_t");S.rv=x?x.value:S.rv;render(true);return}
-  if(d.kw){readCrear();S.f.kw=d.kw;render(true);return}
   if(d.use){readCrear();const u=SIT[d.use];if(u){setVia(u.via);S.f.sit=u.id}S.res=null;go("crear");return}
   if(d.gcopy){copy((ls("ft_guiones")||[])[+d.gcopy].texto);return}
   if(d.gdel){const G=ls("ft_guiones")||[];G.splice(+d.gdel,1);ls("ft_guiones",G);render(true);return}
@@ -652,8 +743,8 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{
   const id=e.target.id||"";
   if(id==="f_obj"){readCrear();setVia(viaOf(S.f.obj));render(true)}
-  else if(id==="f_sit"||id==="f_prod"){readCrear();S.f.kw="";render(true)}
-  else if(id==="f_tono"||id==="f_len"||id==="f_kw"||id==="f_fecha"||id==="f_dias"){readCrear()}
+  else if(id==="f_sit"||id==="f_prod"){readCrear();S.f.kw="";S.f.kwc="";render(true)}
+  else if(id==="f_tono"||id==="f_len"||id==="f_fecha"||id==="f_dias"){readCrear()}
   else if(e.target.name==="i_nivel"){S.f.nivel=e.target.value;S.f.len=defLen(S.f.nivel);const p=ls("ft_perfil")||{};p.nivel=S.f.nivel;ls("ft_perfil",p);render(true)}
   else if(e.target.name==="f_nivel"){readCrear();S.f.len=defLen(S.f.nivel);render(true)}
 });
@@ -734,6 +825,7 @@ function fichaHtml(F,key,o){
   o=o||{};REG[key]=F;
   const k=esc(key);
   let h='<article class="rl-ficha'+(o.nested?" rl-nested":"")+'">';
+  if(o.label)h+='<p class="rl-origen">'+esc(o.label)+'</p>';
   h+='<div class="rl-tags"><span class="tag">'+(F.obj==="captar"?"Captar":"Crecer")+'</span><span class="tag">'+(F.via==="proyecto"?"Proyecto":"Clientas")+'</span><span class="tag">'+esc(DIF[F.dif])+'</span><span class="tag pal">'+esc(F.dur)+'</span>'+(F.gama?'<span class="tag pal">'+esc(F.gama)+'</span>':'')+'</div>';
   h+='<h3 class="rl-idea">'+esc(F.idea)+'</h3>';
   if(F.dolor)h+='<p class="mut rl-dolor">Le pasa a quien te ve: '+esc(F.dolor)+'</p>';
@@ -810,8 +902,8 @@ function fillCap(tpl,s){
   const e=lc(noDot(s.deseo)),v={D:cap(noDot(s.dolor)),d:lc(noDot(s.dolor)),e,y:aYo(e)};
   return limpia(tpl.replace(/\{(D|d|e|y)\}/g,(m,k)=>v[k]));
 }
-function elegirFormato(via,obj,s,prod,avoid,nivel){
-  let c=DB.formatos.filter(x=>x.via.indexOf(via)>=0&&(x.objetivo==="ambos"||x.objetivo===obj));
+function elegirFormato(via,obj,s,prod,avoid,nivel,dif){
+  let c=DB.formatos.filter(x=>x.via.indexOf(via)>=0&&(x.objetivo==="ambos"||x.objetivo===obj)&&(!dif||x.dificultad===dif)); // dif: restricción dura (filtro «Cómo lo grabas»)
   const sub=(fn)=>{const a=c.filter(fn);if(a.length)c=a};
   if(via!=="clientas")sub(x=>!USAP[x.id]);
   if(avoid)sub(x=>!avoid.has(x.id));
@@ -821,22 +913,22 @@ function elegirFormato(via,obj,s,prod,avoid,nivel){
   sub(x=>compat(s,x).length>0);
   return pick(c);
 }
-// f: {via,obj:"crecer"|"captar",sit,fmt:"auto"|id,prod:"auto"|id,kw,nonce,nivel}. av: conjuntos a evitar {g,c,f}. o.avoidFmt: Set de formatos ya usados.
+// f: {via,obj:"crecer"|"captar",sit,dif:""|dificultad,fmt:"auto"|id,prod:"auto"|id,kw,nonce,nivel}. av: conjuntos a evitar {g,c,f}. o.avoidFmt: Set de formatos ya usados.
 function genReel(f,av,o){
   o=o||{};
-  av=av||histSets();av={g:new Set(av.g),c:new Set(av.c),f:new Set(av.f)};
+  av=av||histSets();const av0={g:new Set(av.g),c:new Set(av.c),f:new Set(av.f)};av={g:new Set(av.g),c:new Set(av.c),f:new Set(av.f)};
   const used={g:[],c:[],f:[]};
   let s=SIT[f.sit];
   const via0=f.via||(s&&s.via)||"clientas";
   if(!s||s.via!==via0){const L=sitsVia(via0);s=L[hash(["rs",f.sit,f.nonce].join("|"))%L.length]}
   const via=s.via,obj=f.obj==="captar"?"captar":"crecer";
-  R=mulberry(hash(["reel",via,s.id,obj,f.fmt,f.prod,f.kw||"",f.nonce|0].join("|")));
+  R=mulberry(hash(["reel",via,s.id,obj,f.fmt,f.prod,f.nonce|0].join("|"))); // la palabra clave no entra en la semilla
   const okP=p=>p&&!PROD_EXCL.has(p.id);
   let prod=null;
   if(via==="clientas"&&f.prod&&f.prod!=="auto"&&okP(PROD[f.prod]))prod=PROD[f.prod];
   let fm=(f.fmt&&f.fmt!=="auto")?FM[f.fmt]:null;
   if(fm&&fm.via.indexOf(via)<0)fm=null;
-  if(!fm)fm=elegirFormato(via,obj,s,prod,o.avoidFmt,f.nivel||S.f.nivel);
+  if(!fm)fm=elegirFormato(via,obj,s,prod,o.avoidFmt,f.nivel||S.f.nivel,f.dif);
   // producto: solo si el formato lo pide (o la persona lo ha elegido)
   let prodT="";
   if(USAP[fm.id]){
@@ -857,7 +949,8 @@ function genReel(f,av,o){
   // cierre
   let kw="",guia=null,recT="",cierre;
   if(obj==="captar"){
-    kw=f.kw||pick(s.palabras_clave);
+    const kw0=pick(s.palabras_clave); // se saca siempre, para que cambiar la palabra no cambie el resto
+    kw=f.kw||kw0;
     guia=GUIA_KW[via+"|"+kw]||guiaOf(s);
     recT=guia?guia.titulo:s.recurso;
     const tpl=pickAv(DB.ctas.reel,av,x=>x.decir,"c",used);
@@ -872,12 +965,12 @@ function genReel(f,av,o){
   const nutri=(s.gamas||[]).indexOf("nutri")>=0||s.grupo==="Nutrición y bienestar"||(prod&&prod.gama==="nutri");
   return {gen:true,mudo,id:"gen",via,obj,idea:cap(s.nombre),fm,dolor:s.dolor,gancho:gh.t,tipo:gh.tipo,pantalla,planos,emocion:pick(emoTop(gh.tipo).concat(["cercanía"]).slice(0,3)),
     cierre,kw,recT,guia,caption,aviso:nutri?AVISO_NUTRI:"",dif:fm.dificultad,dur:fm.duracion,consejo:fm.consejo,gama:"",sitN:s.nombre,
-    prod:prod?prod.nombre:"",sit:s,used,f:Object.assign({},f)};
+    prod:prod?prod.nombre:"",sit:s,used,av0,f:Object.assign({},f)};
 }
 
 // ===== estado =====
 S.cmode=S.cmode||"stories";
-S.rl={tab:"listos",lf:{via:"",obj:"",gama:"",dif:""},cur:null,cf:{via:"clientas",obj:"crecer",sit:"",fmt:"auto",prod:"auto",nonce:0},res:null};
+S.rl={tab:"listos",lf:{via:"",obj:"",gama:"",dif:""},cur:null,genF:null,genSig:"",cf:{via:"clientas",obj:"crecer",sit:"",fmt:"auto",prod:"auto",kw:"",kwc:"",nonce:0},res:null};
 
 // ===== biblioteca =====
 const filtrados=()=>{const f=S.rl.lf;return LIB.filter(r=>(!f.via||r.via===f.via)&&(!f.obj||r.objetivo===f.obj)&&(!f.gama||gamaDe(r)===f.gama)&&(!f.dif||FM[r.formato].dificultad===f.dif))};
@@ -885,12 +978,72 @@ function marcarVisto(id){
   const v=(ls(SEEN_KEY)||[]).filter(x=>x!==id);v.push(id);
   ls(SEEN_KEY,v.slice(-SEEN_MAX));
 }
-// «Otro reel»: al azar dentro del filtro, sin repetir los últimos 30 vistos
+// ----- reels combinados (generador) con los mismos filtros que la biblioteca -----
+const GEN_KEY="fs_reels_gen",GEN_SIT=15,GEN_FMT=6,GEN_SIG=60;
+const sitGama=s=>s.via==="proyecto"?"":gamaDe({via:s.via,gamas:s.gamas,situacion:s.id});
+const fmtsPara=(via,obj,dif)=>DB.formatos.filter(x=>x.via.indexOf(via)>=0&&(x.objetivo==="ambos"||x.objetivo===obj)&&(!dif||x.dificultad===dif));
+const objsDe=lf=>lf.obj?[lf.obj]:["crecer","captar"];
+// situaciones que cumplen los filtros (vía y gama) y pueden dar un reel del objetivo pedido
+function genSits(lf,obj){
+  return DB.sits.filter(s=>(!lf.via||s.via===lf.via)&&(!lf.gama||sitGama(s)===lf.gama)&&s.ganchos&&s.ganchos.length&&(obj!=="captar"||(s.palabras_clave||[]).length)&&fmtsPara(s.via,obj,lf.dif).length);
+}
+// ideas distintas posibles: situación × formato × gancho compatible (cota inferior: no cuenta palabras clave ni CTA)
+function genCombos(lf){
+  let n=0;
+  objsDe(lf).forEach(o=>genSits(lf,o).forEach(s=>fmtsPara(s.via,o,lf.dif).forEach(fm=>{n+=compat(s,fm).length||s.ganchos.length})));
+  return n;
+}
+function masDe(n){
+  if(n<200)return "";
+  const q=n>=1000?1000:100,x=Math.floor(n/q)*q;
+  return "más de "+String(x).replace(/\B(?=(\d{3})+(?!\d))/g,".")+" ideas";
+}
+function genOk(F){
+  if(!F||!F.planos||!F.planos.length)return false;
+  const t=[F.idea,F.gancho,F.pantalla,F.cierre,F.caption,F.consejo].concat(F.planos.map(p=>p.ve+" "+p.dice)).join("\n");
+  if(/[{}]|undefined|NaN|null/.test(t))return false;
+  if(scanMeta(t).some(h=>h.l==="alto"))return false;
+  if(F.obj==="captar"){
+    if(!F.kw||!/coment/i.test(F.cierre+" "+F.caption))return false;
+    if(!ctaCheck(F.cierre,{deseo:F.sit.deseo,dolor:F.sit.dolor,recurso:F.recT}).ok)return false;
+  }
+  return true;
+}
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+function genListo(lf){
+  const rec=Object.assign({sig:[],sit:[],fmt:[]},ls(GEN_KEY)||{});
+  const objs=objsDe(lf).filter(o=>genSits(lf,o).length);
+  if(!objs.length)return null;
+  for(let i=0;i<40;i++){
+    const obj=rnd(objs),ok=genSits(lf,obj);
+    const rs=rec.sit.slice(-Math.max(0,Math.min(GEN_SIT,ok.length-1)));
+    let c=ok.filter(s=>rs.indexOf(s.id)<0);if(!c.length)c=ok;
+    const s=rnd(c),nonce=Math.floor(Math.random()*1e9);
+    const F=genReel({via:s.via,obj,sit:s.id,fmt:"auto",prod:"auto",nonce,nivel:"pro",dif:lf.dif||""},histSets(),{avoidFmt:new Set(rec.fmt.slice(-GEN_FMT))});
+    if(!genOk(F))continue;
+    const sig=[s.id,F.fm.id,F.gancho,F.kw].join("|");
+    // con pocas combinaciones posibles (filtros muy cerrados) se acaban las firmas nuevas: se admiten repetidas, nunca la última
+    if(i<30?rec.sig.indexOf(sig)>=0:rec.sig[rec.sig.length-1]===sig)continue;
+    histCommit(F.used);
+    ls(GEN_KEY,{sig:rec.sig.filter(x=>x!==sig).concat(sig).slice(-GEN_SIG),sit:rec.sit.concat(s.id).slice(-GEN_SIT),fmt:rec.fmt.concat(F.fm.id).slice(-GEN_FMT)});
+    F.gama=s.via==="proyecto"?"":(lf.gama||sitGama(s));
+    return F;
+  }
+  return null;
+}
+const genDisponible=lf=>objsDe(lf).some(o=>genSits(lf,o).length>0);
+// «Otro reel»: primero reels escritos del filtro sin repetir los últimos 30 vistos; cuando se agotan, o 1 de cada 3 veces, uno combinado con los mismos filtros
 function otro(){
-  const L=filtrados();
-  if(!L.length){S.rl.cur=null;return null}
+  const L=filtrados(),lf=S.rl.lf,sig=JSON.stringify(lf);
   const seen=ls(SEEN_KEY)||[];
-  let pool=L.filter(r=>seen.indexOf(r.id)<0&&r.id!==S.rl.cur);
+  const fresh=L.filter(r=>seen.indexOf(r.id)<0&&r.id!==S.rl.cur);
+  if(genDisponible(lf)&&(!fresh.length||Math.random()<1/3)){
+    const F=genListo(lf);
+    if(F){S.rl.cur=null;S.rl.genF=F;S.rl.genSig=sig;return F}
+  }
+  S.rl.genF=null;
+  if(!L.length){S.rl.cur=null;return null}
+  let pool=fresh;
   if(!pool.length){
     const ord=L.filter(r=>r.id!==S.rl.cur).sort((a,b)=>seen.indexOf(a.id)-seen.indexOf(b.id));
     pool=ord.slice(0,Math.max(1,Math.ceil(ord.length/3)));
@@ -904,21 +1057,43 @@ const chip=(k,v,lab,on)=>'<button type="button" class="chip'+(on?" on":"")+'" da
 const row=(t,c)=>'<p class="rl-fl">'+t+'</p><div class="chips">'+c+'</div>';
 function listosHtml(){
   const lf=S.rl.lf,L=filtrados();
-  if(L.length&&!(S.rl.cur&&L.some(r=>r.id===S.rl.cur)))otro();
+  if(S.rl.genF&&S.rl.genSig!==JSON.stringify(lf))S.rl.genF=null;
+  if(!(S.rl.cur&&L.some(r=>r.id===S.rl.cur))&&!S.rl.genF)otro();
+  const gen=genDisponible(lf);
   let h='<section class="panel rl-fil"><h3>Elige qué reel buscas</h3>';
   h+=row("Para quién",[["","Todos"],["clientas","Clientas"],["proyecto","El proyecto"]].map(x=>chip("lv",x[0],x[1],lf.via===x[0])).join(""));
   h+=row("Qué quieres conseguir",[["","Todos"],["crecer","Crecer"],["captar","Captar"]].map(x=>chip("lo",x[0],x[1],lf.obj===x[0])).join(""))
    +'<p class="mut rl-help">Crecer es que te descubra gente nueva. Captar es que te escriban con una palabra clave.</p>';
   if(lf.via!=="proyecto")h+=row("Gama",[["","Todas"]].concat(GAMAS.map(g=>[g,g])).map(x=>chip("lg",x[0],x[1],lf.gama===x[0])).join(""));
   h+=row("Cómo lo grabas",[["","Todos"],["sin_cara","Sin cara"],["media","Con soltura"],["con_cara","A cámara"]].map(x=>chip("ld",x[0],x[1],lf.dif===x[0])).join(""));
-  h+='<p class="rl-count"><b>'+L.length+'</b> '+(L.length===1?'reel':'reels')+' con estos filtros</p>';
-  h+='<div class="acts"><button class="btn big" data-act="rl-otro"'+(L.length?'':' disabled')+'>Otro reel</button></div></section>';
-  if(!L.length)return h+'<section class="panel"><p>No hay reels con esta mezcla. Quita algún filtro y vuelve a probar.</p></section>';
-  const r=LIBID[S.rl.cur],F=fichaLib(r);
-  h+='<section class="panel" id="rl-top">'+fichaHtml(F,"l-"+r.id,{extra:'<button class="btn" data-act="rl-otro">Otro reel</button>'})+'</section>';
-  h+='<details class="panel rl-list"><summary>Ver los '+L.length+' reels de esta lista</summary><ul class="rl-lst">'+L.map(x=>'<li><button class="rl-li" data-act="rl-ver" data-id="'+esc(x.id)+'"><b>'+esc(x.idea)+'</b><small>'+(x.objetivo==="captar"?"Captar":"Crecer")+' · '+(x.via==="proyecto"?"Proyecto":esc(gamaDe(x)))+' · '+esc(DIF[FM[x.formato].dificultad])+'</small></button></li>').join("")+'</ul></details>';
+  const mas=gen?masDe(genCombos(lf)):"";
+  h+='<p class="rl-count"><b>'+L.length+'</b> '+(L.length===1?'reel escrito':'reels escritos')+(gen?' + combinaciones nuevas cada vez'+(mas?' · '+esc(mas):''):'')+'</p>';
+  h+='<div class="acts"><button class="btn big" data-act="rl-otro"'+(L.length||gen?'':' disabled')+'>Otro reel</button></div></section>';
+  const otroBtn='<button class="btn" data-act="rl-otro">Otro reel</button>';
+  if(S.rl.genF){
+    h+='<section class="panel" id="rl-top">'+fichaHtml(S.rl.genF,"g-"+S.rl.genSig.length+"-"+S.rl.genF.fm.id+"-"+S.rl.genF.sit.id,{label:"Combinado para ti",extra:otroBtn})+'</section>';
+  }else if(S.rl.cur&&LIBID[S.rl.cur]){
+    const r=LIBID[S.rl.cur];
+    h+='<section class="panel" id="rl-top">'+fichaHtml(fichaLib(r),"l-"+r.id,{label:"Escrito por el equipo",extra:otroBtn})+'</section>';
+  }else return h+'<section class="panel"><p>No hay reels con esta mezcla. Quita algún filtro y vuelve a probar.</p></section>';
+  if(L.length)h+='<details class="panel rl-list"><summary>Ver los '+L.length+' reels escritos de esta lista</summary><ul class="rl-lst">'+L.map(x=>'<li><button class="rl-li" data-act="rl-ver" data-id="'+esc(x.id)+'"><b>'+esc(x.idea)+'</b><small>'+(x.objetivo==="captar"?"Captar":"Crecer")+' · '+(x.via==="proyecto"?"Proyecto":esc(gamaDe(x)))+' · '+esc(DIF[FM[x.formato].dificultad])+'</small></button></li>').join("")+'</ul></details>';
   return h;
 }
+
+// ===== palabra clave de «Crear mi reel» (solo al captar) =====
+const rlKws=s=>{const g=guiaOf(s),own=s.palabras_clave||[],all=own.concat(g?(g.kw||[]).filter(k=>own.indexOf(k)<0).slice(0,2):[]);return all.filter((k,i)=>all.indexOf(k)===i)};
+function rlKwIssues(k){
+  const c=S.rl.res?S.rl.res.f:S.rl.cf,av=S.rl.res?S.rl.res.av0:histSets();
+  return kwIssues(k,x=>{const r=genReel(Object.assign({},c,{kw:x}),av);return [r.cierre,r.caption,r.pantalla,r.planos.map(p=>p.dice).join(" ")]});
+}
+KWT.rl=function(kw,own){
+  const c=S.rl.cf;c.kw=kw;c.kwc=own?kw:"";
+  if(S.rl.res&&S.rl.res.obj==="captar"){
+    S.rl.res=genReel(Object.assign({},S.rl.res.f,{kw}),S.rl.res.av0);
+    const o=$("#rl-top");if(o)o.innerHTML=fichaHtml(S.rl.res,"c-gen",{extra:'<button class="btn" data-act="rc-otra">Otra versión</button>'});
+  }
+  kwShowWarn("rl",own&&kw?rlKwIssues(kw):[],"meta");
+};
 
 // ===== crear mi reel =====
 function crearHtml(){
@@ -937,7 +1112,9 @@ function crearHtml(){
   h+='<div class="rl-form"><label>Situación de tu día a día'+sitSelect("rc_sit",c.sit,c.via)+'</label>';
   h+='<label>Formato'+fsel+'</label>';
   if(!proy&&PL.length)h+='<label>Producto (si quieres)'+sel("rc_prod",[["auto","Según la situación"]].concat(PL.map(p=>[p.id,p.nombre_corto])),c.prod)+'</label>';
-  h+='</div><div class="acts"><button class="btn big" data-act="rc-gen">Montar mi reel</button></div></section>';
+  h+='</div>';
+  if(c.obj==="captar")h+=kwBoxHtml("rl","Palabra clave del cierre",rlKws(s),c.kw,c.kwc,kwWarnHtml(c.kwc?rlKwIssues(c.kwc):[],"meta"),(s.palabras_clave||[])[0]);
+  h+='<div class="acts"><button class="btn big" data-act="rc-gen">Montar mi reel</button></div></section>';
   if(S.rl.res)h+='<section class="panel" id="rl-top">'+fichaHtml(S.rl.res,"c-gen",{extra:'<button class="btn" data-act="rc-otra">Otra versión</button>'})+'</section>';
   else h+='<section class="panel empty"><h3>Empieza aquí</h3><p>Elige una situación, deja el formato en «Elígelo tú» y pulsa «Montar mi reel». Si estás empezando, te saldrán formatos sin cara.</p></section>';
   return h;
@@ -959,7 +1136,7 @@ function setCf(k,v){
   const c=S.rl.cf;
   if(k==="cv"){c.via=v==="proyecto"?"proyecto":"clientas";c.sit=sitSugerida(c.via).id;c.prod="auto";c.fmt="auto"}
   else if(k==="co")c.obj=v==="captar"?"captar":"crecer";
-  S.rl.res=null;
+  c.kw="";c.kwc="";S.rl.res=null;
 }
 document.addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;const d=t.dataset;
@@ -980,7 +1157,7 @@ document.addEventListener("click",e=>{
    case "pre":S.cmode="stories";break; // «Stories que venden» de Inicio: la lógica de nav.js continúa después
    case "reel":{const p=String(d.p||"").split("|");S.rl.tab="listos";S.rl.lf={via:p[0]==="proyecto"?"proyecto":"clientas",obj:p[1]==="captar"?"captar":"crecer",gama:"",dif:""};S.rl.cur=null;S.cmode="reels";go("crear");break}
    case "rl-otro":otro();render(true);arriba();break;
-   case "rl-ver":{if(LIBID[d.id]){S.rl.cur=d.id;marcarVisto(d.id);render(true);arriba()}break}
+   case "rl-ver":{if(LIBID[d.id]){S.rl.cur=d.id;S.rl.genF=null;marcarVisto(d.id);render(true);arriba()}break}
    case "rc-gen":S.rl.cf.nonce=0;S.rl.res=genReel(S.rl.cf,histSets());histCommit(S.rl.res.used);render(true);arriba();break;
    case "rc-otra":S.rl.cf.nonce++;S.rl.res=genReel(S.rl.cf,histSets());histCommit(S.rl.res.used);render(true);arriba();break;
    case "rcopy":if(REG[d.k])copy(guionTxt(REG[d.k]));break;
@@ -991,7 +1168,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{
   const id=e.target.id||"",c=S.rl.cf;
-  if(id==="rc_sit"){c.sit=e.target.value;c.prod="auto";S.rl.res=null;render(true)}
+  if(id==="rc_sit"){c.sit=e.target.value;c.prod="auto";c.kw="";c.kwc="";S.rl.res=null;render(true)}
   else if(id==="rc_fmt"){c.fmt=e.target.value;S.rl.res=null;render(true)}
   else if(id==="rc_prod"){c.prod=e.target.value;S.rl.res=null;render(true)}
 });
@@ -1723,9 +1900,9 @@ const ttFmt=id=>(DB.tiktok.formatos||[]).filter(f=>f.id===id)[0]||null;
 const ttIsNutri=s=>!!s&&((s.gamas||[]).indexOf("nutri")>=0||s.grupo==="Nutrición y bienestar");
 const TT_NOTA_PROD="Vídeo de producto: al publicar, activa «Revelar contenido comercial».";
 
-S.tt={ivia:"proyecto",idea:{proyecto:null,clientas:null},n:{proyecto:0,clientas:0},
-  st:{n:3,via:"proyecto",sit:{},nonce:0,cur:null},
-  pl:{f:"todas",open:null,vals:{},q:{},kw:{}},
+S.tt={ikw:{proyecto:"",clientas:""},ikc:{proyecto:"",clientas:""},ivia:"proyecto",idea:{proyecto:null,clientas:null},n:{proyecto:0,clientas:0},
+  st:{n:3,via:"proyecto",sit:{},nonce:0,cur:null,kw:"",kwc:""},
+  pl:{f:"todas",open:null,vals:{},q:{},kw:{},kwc:{}},
   bl:{via:"todas",fmt:"todos",q:"",lim:20}};
 
 // ---------- anti-repetición: últimos 30 textos generados ----------
@@ -1775,7 +1952,7 @@ function ttGenIdea(via,nonce){
     let x=null;
     if(!first&&hand.length&&R()<1/3){
       const i=pick(hand),f=ttFmt(i.formato);
-      x={via,kind:"idea",id:i.id,pantalla:i.pantalla,grabar:i.grabar,descripcion:i.descripcion,pregunta:i.cta,kw:i.kw,fmt:f,aviso:i.aviso||""};
+      x={via,kind:"idea",id:i.id,pantalla:i.pantalla,grabar:i.grabar,descripcion:i.descripcion,pregunta:i.cta,kw:i.kw,kws:[i.kw],fmt:f,aviso:i.aviso||""};
     }else{
       const s=first?sitSugerida(via):pick(sits),p=pick(plants);
       if(!s||!p)continue;
@@ -1783,7 +1960,7 @@ function ttGenIdea(via,nonce){
       const fill=t=>String(t).replace(/\{deseo\}/g,lc(noDot(s.deseo))).replace(/\{dolor\}/g,s.dolor).replace(/\{KW\}/g,kw);
       const f=ttFmt(p.formato),tm=ttToma(p.formato,via);
       if(!tm||!kw)continue;
-      x={via,kind:"gen",id:p.id+"|"+s.id,pantalla:ttCapIni(fill(pick(p.gen))),grabar:tm.texto,descripcion:s.nombre,pregunta:fill(pick(p.preguntas)),kw,fmt:f,
+      x={via,kind:"gen",id:p.id+"|"+s.id,pantalla:ttCapIni(fill(pick(p.gen))),grabar:tm.texto,descripcion:s.nombre,pregunta:fill(pick(p.preguntas)),kw,kws:(s.palabras_clave||[]).slice(0,3),fmt:f,
         aviso:via==="clientas"&&ttIsNutri(s)?String((DB.gamas.nutri||{}).aviso||""):""};
     }
     const all=[x.pantalla,x.grabar,x.descripcion,x.pregunta].join("\n");
@@ -1795,7 +1972,7 @@ function ttGenIdea(via,nonce){
 }
 function ttNewIdea(via){
   const x=ttGenIdea(via,S.tt.n[via]);
-  S.tt.idea[via]=x;if(x)ttRemember(x.pantalla);
+  S.tt.idea[via]=x;S.tt.ikw[via]="";S.tt.ikc[via]="";if(x)ttRemember(x.pantalla);
 }
 function viewTTIdea(){
   const t=S.tt,via=ttVia(t.ivia);
@@ -1803,9 +1980,24 @@ function viewTTIdea(){
   const x=t.idea[via];
   let h='<section class="panel"><h2>Idea del día</h2><div class="tt-seg" role="group" aria-label="Para quién">'+[["proyecto","Proyecto"],["clientas","Clientas"]].map(v=>'<button type="button" class="'+(via===v[0]?"on":"")+'" data-tt="ivia" data-v="'+v[0]+'" aria-pressed="'+(via===v[0])+'">'+v[1]+'</button>').join("")+'</div>';
   if(!x)return h+'<p class="mut">No he encontrado una idea que cumpla las normas. Pulsa «Otra versión».</p><div class="tt-btns"><button class="btn" data-tt="iotra">Otra versión</button></div></section>';
-  const all=[x.pantalla,x.grabar,x.descripcion,x.pregunta].join("\n");
-  const f=x.fmt;
-  h+='<div class="tt-clip" aria-label="Así se vería el texto sobre el vídeo"><span class="tt-dur">'+(f?esc(f.nombre+" · "+f.duracion):"Vídeo")+'</span><p>'+esc(x.pantalla)+'</p><div class="tt-side"><i></i><i></i><i></i></div></div>'
+  h+=kwBoxHtml("tti","Palabra clave",x.kws.length?x.kws:[x.kw],t.ikw[via]||x.kw,t.ikc[via],kwWarnHtml(t.ikc[via]?ttIdeaIssues(x,t.ikc[via]):[],"tiktok"));
+  h+='<div id="tt_ic">'+ttIdeaCard(x,via)+'</div>';
+  h+='<div class="tt-btns"><button class="btn ghost" data-tt="icopy">Copiar texto</button><button class="btn" data-tt="iotra">Otra versión</button></div>'
+  +'<p class="note"><button class="linkb" data-tab="normas">Ver lo que no se dice</button></p></section>';
+  return h;
+}
+// la idea con la palabra clave elegida (la generada o la propia) ya puesta en todos sus textos
+function ttIdeaWith(x,k){
+  if(!k||k===x.kw)return x;
+  const y=Object.assign({},x,{kw:k});["pantalla","grabar","descripcion","pregunta"].forEach(c=>{y[c]=kwSwap(x[c],x.kw,k)});
+  return y;
+}
+const ttIdeaTexts=y=>[y.pantalla,y.grabar,y.descripcion,y.pregunta];
+function ttIdeaIssues(x,k){return kwIssues(k,w=>ttIdeaTexts(ttIdeaWith(x,w)))}
+const ttIdeaCur=via=>{const x=S.tt.idea[via];return x?ttIdeaWith(x,S.tt.ikw[via]):null};
+function ttIdeaCard(x0,via){
+  const x=ttIdeaWith(x0,S.tt.ikw[via]),all=ttIdeaTexts(x).join("\n"),f=x.fmt;
+  let h='<div class="tt-clip" aria-label="Así se vería el texto sobre el vídeo"><span class="tt-dur">'+(f?esc(f.nombre+" · "+f.duracion):"Vídeo")+'</span><p>'+esc(x.pantalla)+'</p><div class="tt-side"><i></i><i></i><i></i></div></div>'
   +'<div class="tt-card"><div class="tt-lbl">Qué grabar</div><p class="tt-val">'+esc(x.grabar)+'</p>'
   +'<div class="tt-lbl">Descripción</div><p class="tt-val">'+esc(x.descripcion)+'</p>'
   +'<div class="tt-lbl">Pregunta final</div><p class="tt-val">'+esc(x.pregunta)+'</p>'
@@ -1815,10 +2007,14 @@ function viewTTIdea(){
   if(!ttHigh(all))h+='<span class="tt-ok">Revisado: cumple las normas de TikTok y Meta</span>';
   h+='</div>';
   if(f)h+='<details class="tt-det"><summary>Cómo se hace este formato</summary><p>'+esc(f.como)+'</p><p><b>Consejo:</b> '+esc(f.consejo)+'</p></details>';
-  h+='<div class="tt-btns"><button class="btn ghost" data-tt="icopy">Copiar texto</button><button class="btn" data-tt="iotra">Otra versión</button></div>'
-  +'<p class="note"><button class="linkb" data-tab="normas">Ver lo que no se dice</button></p></section>';
   return h;
 }
+KWT.tti=function(k,own){
+  const t=S.tt,via=ttVia(t.ivia),x=t.idea[via];if(!x)return;
+  t.ikw[via]=k;t.ikc[via]=own?k:"";
+  const c=$("#tt_ic");if(c)c.innerHTML=ttIdeaCard(x,via);
+  kwShowWarn("tti",own&&k?ttIdeaIssues(x,k):[],"tiktok");
+};
 
 // ---------- STORIES PARA TIKTOK ----------
 function ttGenStories(via,sitId,n,nonce){
@@ -1850,7 +2046,19 @@ function ttStoriesCur(){
   }
   return st.cur;
 }
-const ttStoriesTxt=r=>r.cards.map((c,i)=>"Story "+(i+1)+" · "+c[0].replace(/^\d+ · /,"")+"\n"+c[1]).join("\n\n");
+// las tarjetas con la palabra clave elegida (la de la situación o la propia) ya puesta
+const ttStCards=(r,k)=>r.cards.map(c=>[c[0],kwSwap(c[1],r.kw,k||r.kw)]);
+const ttStoriesTxt=(r,k)=>ttStCards(r,k).map((c,i)=>"Story "+(i+1)+" · "+c[0].replace(/^\d+ · /,"")+"\n"+c[1]).join("\n\n");
+function ttStIssues(r,k){return kwIssues(k,w=>ttStCards(r,w).map(c=>c[1]))}
+function ttStCardsHtml(r){
+  return r.cards.length?ttStCards(r,S.tt.st.kw).map(c=>'<div class="tt-st'+(r.n===2?" w2":"")+'"><span class="tt-stn">'+esc(c[0])+'</span><p>'+esc(c[1])+'</p></div>').join(""):"";
+}
+KWT.tts=function(k,own){
+  const st=S.tt.st,r=st.cur;if(!r)return;
+  st.kw=k;st.kwc=own?k:"";
+  const c=$("#tt_sc");if(c)c.innerHTML=ttStCardsHtml(r);
+  kwShowWarn("tts",own&&k?ttStIssues(r,k):[],"tiktok");
+};
 function viewTTStories(){
   const st=S.tt.st,via=ttVia(st.via),r=ttStoriesCur(),sid=st.sit[via];
   let h='<section class="panel"><h2>Stories para TikTok</h2>'
@@ -1859,8 +2067,8 @@ function viewTTStories(){
   +'<label>Situación de tu día a día'+sitSelect("tt_sit",sid,via)+'</label>'
   +'<p class="tt-sitdolor"><b>'+esc(SIT[sid].nombre)+'</b>: '+esc(SIT[sid].dolor)+'</p>';
   if(!r)return h+'<p class="mut">No he podido montar la secuencia con esta situación. Prueba con otra o pulsa «Otra secuencia».</p><div class="tt-btns"><button class="btn" data-tt="stotra">Otra secuencia</button></div></section>';
-  h+='<div class="tt-stories" role="region" aria-label="Tus stories: desliza hacia los lados para verlas" tabindex="0">'
-  +r.cards.map(c=>'<div class="tt-st'+(r.n===2?" w2":"")+'"><span class="tt-stn">'+esc(c[0])+'</span><p>'+esc(c[1])+'</p></div>').join("")+'</div>';
+  h+=kwBoxHtml("tts","Palabra clave de la llamada final",(r.sit.palabras_clave||[]).slice(0,3),st.kw||r.kw,st.kwc,kwWarnHtml(st.kwc?ttStIssues(r,st.kwc):[],"tiktok"));
+  h+='<div class="tt-stories" id="tt_sc" role="region" aria-label="Tus stories: desliza hacia los lados para verlas" tabindex="0">'+ttStCardsHtml(r)+'</div>';
   if(r.aviso)h+='<div class="aviso tt-aviso"><b>Aviso:</b> '+esc(r.aviso)+'</div>';
   h+='<div class="tt-note"><b>La llamada final siempre lleva tres cosas:</b> qué consigue, qué le mandas y la palabra clave. '+esc(DB.tiktok.stories.nota_tt)+'</div>'
   +'<p class="tt-small">'+esc(DB.tiktok.stories.nota_ig)+'</p>'
@@ -1871,12 +2079,20 @@ function viewTTStories(){
 
 // ---------- PLANTILLAS ----------
 const ttPlan=id=>DB.tiktok.plantillas.filter(p=>p.id===id)[0]||null;
+const ttPlChips=p=>(sitSugerida(p.via==="clientas"?"clientas":"proyecto").palabras_clave||[]).slice(0,3);
 function ttPlKw(p){
   const k=S.tt.pl.kw;
-  if(k[p.id]==null)k[p.id]=((sitSugerida(p.via==="clientas"?"clientas":"proyecto").palabras_clave||[])[0])||"PALABRA";
+  if(k[p.id]==null)k[p.id]=ttPlChips(p)[0]||"PALABRA";
   return k[p.id];
 }
-function ttPlText(p){
+function ttPlIssues(p,k){return kwIssues(k,w=>[ttPlText(p,w).full])}
+KWT.ttp=function(k,own){
+  const pl=S.tt.pl,p=pl.open&&ttPlan(pl.open);if(!p)return;
+  pl.kw[p.id]=k||ttPlChips(p)[0]||"PALABRA";pl.kwc[p.id]=own?k:"";
+  ttPlRefresh();
+  kwShowWarn("ttp",own&&k?ttPlIssues(p,k):[],"tiktok");
+};
+function ttPlText(p,kwo){
   const v=S.tt.pl.vals[p.id]||{};
   const main=p.molde.replace(/\{(\w+)\}/g,(m,k)=>{
     const hq=p.huecos.filter(x=>x.k===k)[0];
@@ -1884,7 +2100,7 @@ function ttPlText(p){
     return x||"["+(hq?lc(hq.label):k)+"]";
   });
   const qi=S.tt.pl.q[p.id]||0;
-  const cierre=String(p.preguntas[qi%p.preguntas.length]).replace(/\{KW\}/g,ttPlKw(p)||"PALABRA");
+  const cierre=String(p.preguntas[qi%p.preguntas.length]).replace(/\{KW\}/g,kwo||ttPlKw(p)||"PALABRA");
   return {main,cierre,full:main+"\n\n"+cierre};
 }
 const ttViaTxt=v=>v==="proyecto"?"Proyecto":v==="clientas"?"Clientas":"Proyecto y clientas";
@@ -1905,7 +2121,7 @@ function viewTTPlantilla(p){
   let h='<section class="panel"><button class="linkb" data-tt="plback">‹ Todas las plantillas</button><h3 class="tt-ph">'+esc(p.nombre)+'</h3>'
   +'<p class="mut">'+ttViaTxt(p.via)+(f?' · '+esc(f.nombre)+' · '+esc(f.duracion):'')+'</p>'
   +'<div class="tt-pf">'+p.huecos.map(x=>'<label>'+esc(x.label)+'<input type="text" data-ttk="'+esc(x.k)+'" value="'+esc(Object.prototype.hasOwnProperty.call(pl.vals[p.id],x.k)?pl.vals[p.id][x.k]:x.ejemplo)+'" maxlength="140" autocomplete="off"></label>').join("")
-  +'<label>Palabra clave<input type="text" data-ttk="__kw" value="'+esc(ttPlKw(p))+'" maxlength="20" autocomplete="off" autocapitalize="characters"><small>Una sola palabra en mayúsculas. Nunca pongas un enlace.</small></label></div>'
+  +'</div>'+kwBoxHtml("ttp","Palabra clave",ttPlChips(p),ttPlKw(p),pl.kwc[p.id],kwWarnHtml(pl.kwc[p.id]?ttPlIssues(p,pl.kwc[p.id]):[],"tiktok"))
   +'<div class="tt-lbl">Texto para el vídeo</div><div class="tt-res" id="tt_out"></div>'
   +'<div class="tt-lbl">Pregunta final</div><div class="tt-chips">'+p.preguntas.map((q,i)=>'<button type="button" class="chip'+(i===qi?" on":"")+'" data-tt="plq" data-i="'+i+'" aria-pressed="'+(i===qi)+'">Opción '+(i+1)+'</button>').join("")+'</div>'
   +'<p class="tt-val" id="tt_cierre"></p>'
@@ -2006,7 +2222,7 @@ function viewNormas(){
 Object.assign(VIEWS,{tt_idea:viewTTIdea,tt_stories:viewTTStories,tt_plantillas:viewTTPlantillas,tt_banco:viewTTBanco,tt_historia:viewTTHistoria,tt_respuestas:viewTTRespuestas,tt_bio:viewTTBio,tt_semana:viewTTSemana,normas:viewNormas});
 
 // ---------- eventos ----------
-function ttStReset(){S.tt.st.nonce=0;S.tt.st.cur=null}
+function ttStReset(){S.tt.st.nonce=0;S.tt.st.cur=null;S.tt.st.kw="";S.tt.st.kwc=""}
 document.addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;const d=t.dataset;
   if(d.red){redSet(d.red);render();return}
@@ -2015,11 +2231,11 @@ document.addEventListener("click",e=>{
   switch(a){
    case "ivia":T.ivia=ttVia(d.v);render(true);break;
    case "iotra":{const v=ttVia(T.ivia);T.n[v]++;ttNewIdea(v);render(true);break}
-   case "icopy":{const x=T.idea[ttVia(T.ivia)];if(x)copy(ttCopyTxt(x));break}
+   case "icopy":{const x=ttIdeaCur(ttVia(T.ivia));if(x)copy(ttCopyTxt(x));break}
    case "stn":T.st.n=+d.v===2?2:3;ttStReset();render(true);break;
    case "stvia":T.st.via=ttVia(d.v);ttStReset();render(true);break;
-   case "stotra":T.st.nonce++;T.st.cur=null;render(true);break;
-   case "stcopy":{const r=ttStoriesCur();if(r)copy(ttStoriesTxt(r));break}
+   case "stotra":T.st.nonce++;T.st.cur=null;T.st.kw="";T.st.kwc="";render(true);break;
+   case "stcopy":{const r=ttStoriesCur();if(r)copy(ttStoriesTxt(r,T.st.kw));break}
    case "plf":T.pl.f=["proyecto","clientas"].indexOf(d.v)>=0?d.v:"todas";render(true);break;
    case "plopen":if(ttPlan(d.id)){T.pl.open=d.id;render()}break;
    case "plback":T.pl.open=null;render();break;
@@ -2039,8 +2255,7 @@ document.addEventListener("input",e=>{
   const k=el.dataset&&el.dataset.ttk;
   if(k&&S.tt.pl.open){
     const p=ttPlan(S.tt.pl.open);if(!p)return;
-    if(k==="__kw"){S.tt.pl.kw[p.id]=norm(el.value).toUpperCase().replace(/[^A-Z0-9]/g,"")}
-    else if(p.huecos.some(x=>x.k===k)){(S.tt.pl.vals[p.id]=S.tt.pl.vals[p.id]||{})[k]=el.value}
+    if(p.huecos.some(x=>x.k===k)){(S.tt.pl.vals[p.id]=S.tt.pl.vals[p.id]||{})[k]=el.value}
     ttPlRefresh();
   }
 });
@@ -2380,7 +2595,7 @@ function sitSugerida(via,fecha){
 }
 function preseleccion(via){
   const f=S.f;
-  f.via=via;f.obj=objDefault(via);f.sit=sitSugerida(via).id;f.kw="";f.prod="auto";S.res=null;
+  f.via=via;f.obj=objDefault(via);f.sit=sitSugerida(via).id;f.kw="";f.kwc="";f.prod="auto";S.res=null;
 }
 
 // ----- eventos propios -----

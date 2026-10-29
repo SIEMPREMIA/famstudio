@@ -203,6 +203,7 @@ body:has(#app[hidden]){padding-bottom:0}
  .ptab td[data-l]{grid-column:2}
  .ptab td[data-l]::before{content:attr(data-l);display:block;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
 }
+.rl-origen{margin:0 0 6px;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--mut,#8a766b)}
 
 /* ===== Recursos, Mi negocio, Mi perfil de Instagram, Mis números ===== */
 input[type=search],input[type=tel],input[type=url]{display:block;width:100%;margin-top:5px;padding:10px 11px;border:1px solid var(--crd);border-radius:4px;background:#fff;color:var(--ink);font:inherit;text-transform:none;letter-spacing:0;font-weight:400}
@@ -287,6 +288,16 @@ body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 /* barra inferior de 6 pestañas: cabe en 360 px sin desbordar */
 .bn{font-size:.66rem;letter-spacing:.03em;padding-left:0;padding-right:0;min-width:0;overflow:hidden;text-overflow:clip;white-space:nowrap}
 @media(max-width:380px){.bn{font-size:.62rem;letter-spacing:.01em}}
+/* palabra clave propia: sugerencias + «Escribe la tuya» + avisos (avisan, nunca bloquean) */
+.kwbox{margin:2px 0 14px;min-width:0}
+.kwlbl{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--br)}
+.kwown{margin-top:8px}
+.kwin{text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.kwwarn:empty{display:none}
+.kwwarn{margin-top:8px}
+.kwm{margin:0 0 6px;padding:8px 10px;border-left:4px solid var(--crd);background:var(--cr);font-size:.88rem;overflow-wrap:anywhere}
+.kwm-no{border-left-color:var(--no);background:#f8ebe5;color:var(--ink)}
+.kwm-no b{color:var(--no)}
 
 /* ===== Fam Studio · TikTok (móvil primero, 360-430 px) ===== */
 /* selector INSTAGRAM | TIKTOK */
@@ -466,5 +477,5 @@ body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 <nav id="bnav" aria-label="Secciones"></nav>
 </div>
 <div id="toast" role="status"></div>
-<script src="shell.js?v=20261028151718"></script>
+<script src="shell.js?v=20261028160749"></script>
 </body></html>
