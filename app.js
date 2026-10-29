@@ -69,7 +69,7 @@ const NIVEL_TXT=["Nivel 0 · todavía no sabe que le pasa","Nivel 1 · lo sabe, 
 // ===== utilidades de seguridad para la administración =====
 // Solo se aceptan enlaces https:// cuyo dominio esté en esta lista (la misma que valida el build para content/equipo.json)
 // o del propio origen. Sin usuario, contraseña ni puerto.
-const LINK_HOSTS=["youtube.com","www.youtube.com","m.youtube.com","youtu.be","t.me","chat.whatsapp.com","whatsapp.com","el-despertador-farmasi.mixlr.com","boards.com","academia-farmasi-espana.teachable.com","farmasi.com","www.farmasi.com","linktr.ee","www.facebook.com","open.spotify.com","catalog.farmasius.com","viewer.ipaper.io","catalog.farmasi.pl","drive.google.com","www.canva.com"];
+const LINK_HOSTS=["youtube.com","www.youtube.com","m.youtube.com","youtu.be","t.me","chat.whatsapp.com","whatsapp.com","el-despertador-farmasi.mixlr.com","boards.com","academia-farmasi-espana.teachable.com","farmasi.com","www.farmasi.com","linktr.ee","www.facebook.com","open.spotify.com","catalog.farmasius.com","viewer.ipaper.io","catalog.farmasi.pl","drive.google.com","www.canva.com","libertyexpress.com","www.cpxbox.es","casillainternacional.com","www.casilleroenmiamicr.com","www.sandovaldocuments.com","www.deblex.com.ec","tlcargo.net","s2.stephytrackingonline.com","solboxus.com","www.tiktok.com","newsroom.tiktok.com","support.tiktok.com","ads.tiktok.com"];
 function linkOk(u){
   try{
     const x=new URL(String(u).trim());
@@ -494,8 +494,8 @@ function viewAyuda(){
   const L=(t,d)=>'<dt>'+t+'</dt><dd>'+d+'</dd>';
   let h='<section class="panel hero"><h2>Bienvenida</h2><p class="lead">Fam Studio te prepara lo que vas a publicar en Instagram: qué poner en pantalla, qué grabar y qué decir. No necesitas saber de redes. Si algo no lo entiendes, pasa a la siguiente parte y vuelve cuando quieras.</p>'
   +'<fieldset><legend>Cuéntanos tu nivel</legend><div class="radios">'+[["empiezo","Empiezo hoy","Nunca he publicado stories o casi nada."],["suelto","Me suelto","Publico de vez en cuando y me atrevo a hablar a cámara."],["pro","Ya publico a diario","Tengo rutina y busco ordenar mi contenido."]].map(r=>'<label class="rad"><input type="radio" name="i_nivel" value="'+r[0]+'"'+(lv===r[0]?" checked":"")+'><span><b>'+r[1]+'</b><small>'+r[2]+'</small></span></label>').join("")+'</div></fieldset>'
-  +'<div class="acts"><button class="btn big" data-go="crear">Crear mi primera secuencia</button><button class="btn ghost" data-go="semana">Preparar mi semana</button></div>'
-  +'<p class="note" id="i_msg">'+({empiezo:"Te saldrán secuencias de 3 stories y reels sin cara, con fotos y texto.",suelto:"Te saldrán secuencias de 4 stories y reels con algo de voz, mezclando fotos, texto y algún vídeo corto.",pro:"Te saldrán secuencias de 5 stories y reels de todos los tipos, con más variedad de formatos."}[lv])+'</p></section>';
+  +'<div class="acts"><button class="btn big" data-go="crear">Crear mi primera publicación</button><button class="btn ghost" data-go="semana">Preparar mi semana</button></div>'
+  +'<p class="note" id="i_msg">'+({empiezo:"Crear te propondrá 3 stories por secuencia. Siempre puedes cambiarlo.",suelto:"Crear te propondrá 4 stories por secuencia. Siempre puedes cambiarlo.",pro:"Crear te propondrá 5 stories por secuencia. Siempre puedes cambiarlo."}[lv])+'</p></section>';
   h+=D("Lo básico en un minuto",'<dl class="gl">'
    +L("Story","Una foto o un vídeo corto que se ve 24 horas en Instagram. Varias seguidas forman una secuencia.")
    +L("Reel","Un vídeo corto que Instagram enseña también a gente que todavía no te sigue. Sirve para que te descubran.")
@@ -505,25 +505,20 @@ function viewAyuda(){
    +'<p class="note">El camino completo: publicas un reel o unas stories, alguien escribe la palabra, le mandas el recurso por privado, la conversación pasa a WhatsApp y ahí le aconsejas o le propones el siguiente paso.</p>',true);
   h+=D("La barra de abajo: dónde está cada cosa",'<dl class="gl">'
    +L("Inicio","La pantalla de «¿Qué quieres hoy?». Desde ahí llegas a lo más habitual con un solo toque.")
-   +L("Crear","Aquí preparas una publicación suelta. Arriba eliges entre <b>Stories</b> y <b>Reels</b>.")
-   +L("Semana","Un plan para toda la semana con reels y stories. Sale con un solo tema y ya lo tienes ordenado por días.")
+   +L("Crear","Aquí preparas una publicación: <b>Stories</b>, <b>Reel</b> o <b>TikTok</b>. Tres preguntas y te sale el guion.")
+   +L("Semana","Tu calendario: qué publicar cada día, editable y guardado en tu móvil.")
    +L("Recursos","Las guías y las tarjetas que mandas por privado, las respuestas a dudas y los mensajes para cada momento de una conversación.")
    +L("Más","Todo lo demás: Situaciones, Ganchos, Formatos, Cuadrícula, Revisor, Mi negocio, Mi perfil de Instagram, Mis números, Mi cuenta, Instalar y Administración.")+'</dl>'
    +'<p class="note">La opción en la que estás aparece marcada en la barra. Si te pierdes, toca Inicio.</p>');
-  h+=D("Si estás empezando: tu primera publicación en 4 pasos",'<ol class="steps"><li><b>Ve a Inicio y toca «Stories que venden».</b> Se abre Crear con una situación del día a día ya elegida. Si no te suena, cámbiala por otra que te pase de verdad.</li><li><b>Pulsa «Generar secuencia».</b> Te sale la secuencia completa, story por story. Si no te convence, pulsa «Otra versión» las veces que quieras.</li><li><b>Graba lo que dice «Qué grabar».</b> Escribe en pantalla lo que dice «En pantalla» y usa «Qué decir» como guía, con tus palabras y sin leerlo. Cada story dura de 7 a 15 segundos.</li><li><b>Publícala entre las 11:00 y las 14:00.</b> Si alguien escribe tu palabra clave, abre Recursos, busca la guía y copia el mensaje de entrega.</li></ol><p class="note">Es mejor publicar poco y todas las semanas que mucho un día y nada después.</p>',true);
-  h+=D("Crear: stories y reels",'<p><b>Stories.</b> Eliges para quién son (clientas o proyecto), qué quieres conseguir, una situación y cuántas stories quieres. Cada una trae <b>En pantalla</b> (el texto), <b>Qué grabar</b>, <b>Qué decir</b>, <b>Dónde ponerlo</b> y a veces un <b>Sticker</b>. El resumen «Revisión» te dice si la secuencia está bien montada.</p>'
-   +'<p><b>Reels.</b> Hay dos caminos. <b>Reels listos</b>: reels ya escritos. Los filtras según para quién son, si buscas crecer o captar, la gama de producto y lo que te cuesta grabarlos (sin cara, con soltura o a cámara). <b>Crear mi reel</b>: eliges situación y formato, y te monta gancho, planos, texto en pantalla, cierre y descripción.</p>'
-   +'<p><b>Crecer</b> es que te descubra gente nueva y termina invitando a seguirte. <b>Captar</b> termina con una palabra clave y un recurso que mandas por privado.</p>'
-   +'<p>En cada reel o secuencia puedes copiar el guion, copiar la descripción o guardarlo en Mi cuenta.</p>');
+  h+=D("Si estás empezando: tu primera publicación en 4 pasos",'<ol class="steps"><li><b>Ve a Crear.</b> Arriba eliges Stories, Reel o TikTok.</li><li><b>Responde las tres preguntas:</b> para quién (Clientas o Proyecto), qué quieres conseguir y de qué hablas hoy. La situación marcada con HOY ya viene elegida.</li><li><b>Toca «Ver mi guion».</b> Cada story o vídeo trae tres pasos: qué grabas, qué escribes y qué dices.</li><li><b>Publica y contesta.</b> Cuando alguien te escriba la palabra, abre «Lo que mandas cuando te escriban» y copia el mensaje con la guía.</li></ol>',true);
+  h+=D("Crear: stories, reels y TikTok",'<p>Tres preguntas: <b>para quién</b>, <b>qué quieres conseguir</b> y <b>de qué hablas hoy</b>. Cada pregunta solo te enseña lo que encaja con la anterior, así que no hay combinaciones sin sentido. Las situaciones de temporada salen solas en «Esta temporada» y «Fechas que vienen».</p><p><b>Stories:</b> de 2 a 8 (te recomendamos 3). Cada una trae su vista previa, qué grabas, qué escribes y qué dices. Si no te convence el gancho o el cierre, pulsa «Otro gancho» u «Otro cierre».</p><p><b>Reel:</b> portada, planos uno a uno con su texto y la descripción. <b>TikTok:</b> un vídeo de 7 segundos explicado en cinco pasos.</p><p>La <b>palabra clave</b> va siempre abajo, en grande, sin tapar tu cara. Puedes cambiarla o escribir la tuya, y la app te avisa si se salta las normas. Abajo de cada guion tienes lo que mandas cuando te escriban y más ideas de qué grabar.</p>');
   h+=D("Cómo leer cada story",'<dl class="gl">'+L("En pantalla","El texto que escribes encima de la foto o del vídeo.")+L("Qué grabar","La foto o el vídeo que necesitas hacer.")+L("Qué decir","Lo que cuentas con tu voz. Con tus palabras, sin leerlo.")+L("Dónde ponerlo","En qué parte de la pantalla va el texto. Mira Cuadrícula, en Más.")+L("Sticker","Un añadido de Instagram, como una caja de preguntas o una encuesta.")+L("Formato A, B, C o D","La forma de hacer la story. A es con tu cara, B es una foto o vídeo bonito sin cara, C es una foto con texto o una captura y D enseña un paso. Si dudas, mira Formatos, en Más.")+L("Retención, Respuestas, Primera semana","Para qué sirve esa story: que la gente la vea entera, que te conteste o que una persona nueva te conozca.")+'</dl>');
-  h+=D("Semana: todo el plan ya hecho",'<ol class="steps"><li><b>Elige para quién es</b> (clientas o proyecto), el <b>plan</b> y el <b>tema de la semana</b>. Todo gira en torno a un solo problema de tu clienta, contado de formas distintas.</li><li><b>Pulsa «Preparar la semana».</b> Sale un calendario con los días que toca publicar.</li><li><b>Abre cada día</b> y encontrarás sus reels y sus secuencias de stories, con su guion completo. Cada pieza tiene «Otra versión», «Copiar» y «Guardar».</li><li><b>«Copiar toda la semana»</b> te lo lleva todo a una nota para tenerlo a mano.</li></ol>'
-   +'<dl class="gl">'+L("Plan Inicio","1 reel y 3 secuencias de stories. Para empezar sin agobio.")+L("Plan Estándar","2 reels y 4 secuencias de stories. El ritmo cómodo.")+L("Plan Completo","3 reels y 6 secuencias de stories. Para quien ya publica a diario.")+'</dl>'
-   +'<p class="note">Reglas de la semana: los reels se publican por la mañana y las stories entre las 11:00 y las 14:00. El sábado se descansa. Como máximo dos llamadas a la acción en las stories de la semana, y nunca dos el mismo día (cuenta también el reel de captar).</p>');
-  h+=D("Recursos: lo que mandas por privado",'<p>Cuando alguien escribe tu palabra clave, entra aquí. En <b>Guías</b> elige la que corresponde (se ordenan para clientas y para el proyecto). Dentro de cada guía vas paso a paso:</p><ol class="steps"><li><b>Mensaje de entrega:</b> lo primero que mandas, con la guía.</li><li><b>El material:</b> el texto para pegar en el chat y una <b>tarjeta</b> con imagen para compartir o descargar.</li><li><b>Seguimiento a los 2 o 3 días</b>, por si no ha contestado.</li><li><b>Pasar a WhatsApp</b>, con tu teléfono ya puesto si lo guardaste en Mi cuenta.</li><li><b>Siguiente paso:</b> en clientas, recomendarle algo concreto sin presión; en proyecto, proponerle un Zoom corto o el vídeo de menos de 10 minutos.</li></ol>'
+  h+=D("Mi semana: tu calendario de publicaciones",'<ol class="steps"><li><b>Crea tu semana rápida.</b> Eliges cuántos reels, secuencias de stories y TikTok quieres, cuántos para el proyecto y cuántos para clientas, el tema y tu día de descanso. La app lo reparte por días.</li><li><b>Cámbialo todo.</b> Cada publicación se puede abrir, mover a otro día con «Mover…» o quitar. Con «+ Añadir» pones lo que quieras en el día que quieras.</li><li><b>Añade desde Crear.</b> Si te gusta un guion, al final tienes «Añadir a mi semana»: eliges el día y el momento.</li><li><b>Cada día,</b> toca «Abrir guion», publícalo y márcalo como hecho.</li></ol><p class="note">Tu semana se guarda en este móvil. Puedes ver la que viene con la flecha de arriba y copiarla entera para mandártela por WhatsApp.</p>');
+  h+=D("Recursos: lo que mandas por privado",'<p>Cuando alguien escribe tu palabra clave, entra aquí y escríbela en «¿Te han escrito una palabra?»: te sale el mensaje y la guía que tienes que mandar. También puedes buscar por tema. En <b>Guías</b> elige la que corresponde (se ordenan para clientas y para el proyecto). Dentro de cada guía vas paso a paso:</p><ol class="steps"><li><b>Mensaje de entrega:</b> lo primero que mandas, con la guía.</li><li><b>El material:</b> el texto para pegar en el chat y una <b>tarjeta</b> con imagen para compartir o descargar.</li><li><b>Seguimiento a los 2 o 3 días</b>, por si no ha contestado.</li><li><b>Pasar a WhatsApp</b>, con tu teléfono ya puesto si lo guardaste en Mi cuenta.</li><li><b>Siguiente paso:</b> en clientas, recomendarle algo concreto sin presión; en proyecto, proponerle un Zoom corto o el vídeo de menos de 10 minutos.</li></ol>'
    +'<p>Además tienes <b>Respuestas a dudas</b> (qué decir cuando dicen «es caro» o «no tengo tiempo») y <b>Mensajes del día a día</b> (dar las gracias, reactivar a alguien, responder a «me lo pienso»). Cada mensaje tiene su botón para copiar.</p>');
   h+=D("Más: el resto de herramientas",'<dl class="gl">'
-   +L("Situaciones","Ideas de qué contar: la escena, el problema de tu clienta y ocho ganchos ya escritos.")
-   +L("Ganchos","Doce formas de empezar para que no pasen de largo. Escribe tu tema y te las rellena.")
+   +L("Situaciones","Todas las situaciones del banco, con su palabra clave y lo que mandas. Desde cada una puedes crear directamente.")
+   +L("Ganchos","Más de 5.000 ganchos escritos para cada situación. Escribe de qué vas a hablar y te salen los que encajan.")
    +L("Formatos","Qué es cada tipo de story y cómo se graba.")
    +L("Cuadrícula","Dónde colocar el texto y la palabra clave en la pantalla.")
    +L("Revisor","Pega un texto y te avisa de frases que Instagram penaliza y de llamadas a la acción flojas.")
@@ -533,7 +528,7 @@ function viewAyuda(){
    +L("Mi cuenta","Tu nombre, usuario de Instagram, teléfono, nivel y tus guiones guardados.")
    +L("Instalar en el móvil","Cómo tener Fam Studio como una app, con su icono.")
    +L("Administración","Solo para quien administra el equipo: cambiar códigos y añadir recursos propios.")+'</dl>');
-  h+=D("Si ya publicas a diario",'<ul><li>En <b>Semana</b> usa el plan Completo y el tema de la semana como hilo. Cambia el tema cada lunes.</li><li>Pon el nivel «Ya publico a diario» para que mezcle los cuatro formatos y los reels con cara.</li><li>En <b>Crear · Reels</b> alterna reels de crecer (que te descubran) con uno de captar a la semana.</li><li>Usa <b>Ganchos</b> para no repetir siempre el mismo arranque y <b>Formatos</b> para variar la forma de grabar.</li><li>Pasa tus propias llamadas a la acción por <b>Revisor</b> → «Revisar un CTA»: comprueba que hay beneficio, promesa y acción.</li><li>Mide cada semana en <b>Mis números</b>: alcance, respuestas y paso a WhatsApp. Te dice qué parte mejorar primero.</li><li>Si tu equipo comparte material propio, lo verás en <b>Recursos</b> con la etiqueta «Del equipo».</li></ul>');
+  h+=D("Si ya publicas a diario",'<ul><li>En <b>Semana</b> cambia el tema cada lunes y sigue el plan de cada día.</li><li>En <b>Crear</b> alterna «Que me conozca gente nueva» con «Que me escriban»: uno para que te descubran y otro para que te pidan la guía.</li><li>Sube dos TikTok al día, separados al menos 4 horas.</li><li>Usa <b>Ganchos</b> para no repetir siempre el mismo arranque y <b>Formatos</b> para variar la forma de grabar.</li><li>Pasa tus propias llamadas a la acción por <b>Revisor</b> → «Revisar un CTA»: comprueba que hay beneficio, promesa y acción.</li><li>Mide cada semana en <b>Mis números</b>: alcance, respuestas y paso a WhatsApp. Te dice qué parte mejorar primero.</li><li>Si tu equipo comparte material propio, lo verás en <b>Recursos</b> con la etiqueta «Del equipo».</li></ul>');
   h+=D("La palabra clave y la llamada a la acción",'<p>En vez de un enlace, le pides a la persona que comente o te responda una palabra, por ejemplo RUTINA, y le mandas algo útil por privado. Las palabras que te sugerimos cambian según la situación. Puedes tocar una o escribir la tuya, siempre una sola palabra.</p><p>Una buena llamada a la acción dice tres cosas: qué consigue la persona, qué recibe y qué tiene que hacer.</p>');
   h+=D("Tenerla como una app en el móvil",'<p><b>iPhone:</b> abre el enlace en Safari, toca el botón de compartir y elige «Añadir a pantalla de inicio».</p><p><b>Android:</b> abre el enlace en Chrome, toca los tres puntos y elige «Añadir a pantalla de inicio» o «Instalar app».</p><p>Hay una guía con dibujos en Más → Instalar en el móvil. Tus guiones, tus números y tu perfil se quedan solo en tu móvil.</p>');
   h+=D("Cuatro reglas que no te saltes",'<ul><li>Nada de dinero, ingresos ni comisiones.</li><li>Nada de peso, antes y después de cuerpo ni promesas de salud.</li><li>Una oferta solo con fecha límite real.</li><li>El caso de una clienta, solo con su permiso por escrito.</li></ul><p class="note">Si dudas de un texto, pégalo en el Revisor (Más).</p>');
@@ -690,16 +685,16 @@ function viewGuia(){
   const D=(t,b)=>'<details class="panel gd"><summary>'+t+'</summary><div class="gb2">'+b+'</div></details>';
   const tipos=via=>"<ul>"+objsVia(via).map(k=>'<li><b>'+esc(DB.OBJS[k].corto)+' ('+esc(DB.OBJS[k].tipo.toLowerCase())+').</b> '+esc(DB.OBJS[k].que)+'</li>').join("")+"</ul>";
   let h='<section class="panel"><h2>Guía del método</h2><p class="lead">Lo esencial para publicar con cabeza, explicado sin palabras raras. Si empiezas, lee las cuatro primeras.</p></section>';
-  h+=D("Reels atraen, stories convierten","<p>Los <b>reels</b> hacen que te descubra gente nueva. Las <b>stories</b> hacen que quien ya te sigue confíe en ti y te escriba. Los <b>recursos</b> son lo que mandas por mensaje privado cuando alguien te lo pide.</p><p>Por eso cada pieza tiene un objetivo: un reel para <b>crecer</b> (que te descubran), un reel para <b>captar</b> (que te escriban con una palabra clave) y secuencias de stories que ayudan, enseñan o cuentan tu día.</p>");
+  h+=D("Reels atraen, stories convierten","<p>Los <b>reels</b> y los <b>TikTok</b> hacen que te descubra gente nueva. Las <b>stories</b> hacen que quien ya te sigue confíe en ti y te escriba. Lo que mandas por privado cuando alguien te escribe la palabra es la <b>guía</b> de cada situación.</p><p>Por eso en Crear eliges siempre un objetivo: que te conozca gente nueva, que te escriban, que confíen en ti, recomendar un producto, resolver una duda o invitar (al reto, al taller o a una formación).</p>");
   h+=D("El camino completo: del comentario a WhatsApp","<ol><li><b>Publicas</b> un reel o unas stories que hablan de un problema concreto de tu clienta.</li><li><b>Alguien escribe</b> tu palabra clave (en un comentario o respondiendo a la story).</li><li><b>Le mandas el recurso</b> por mensaje privado de Instagram: la guía y, si quieres, la tarjeta.</li><li><b>Seguimiento</b> a los 2 o 3 días, sin presión, si no ha contestado.</li><li><b>Pasas a WhatsApp</b> cuando ya hay confianza. Con una clienta: un consejo según lo que necesita y, si quiere, su pedido. Con alguien interesado en el proyecto: información básica y un Zoom corto de lunes a viernes entre las 9:00 y las 21:00. Si no quiere Zoom, un vídeo de menos de 10 minutos.</li></ol><p class=\"note\">Todo esto está en Recursos, mensaje a mensaje.</p>");
   h+=D("Las 5 preguntas antes de grabar","<ol><li>¿A quién me dirijo? A tu clienta ideal, no a todo el mundo.</li><li>¿Qué problema cuento? Uno solo por reel o secuencia.</li><li>¿Qué le aporto? Algo que pueda aplicar hoy.</li><li>¿Se nota que sé del tema? Cuenta lo que haces tú, con detalles reales.</li><li>¿Qué punto de partida tiene? ¿Sabe que tiene el problema? ¿Conoce la solución? ¿Ya está comparando?</li></ol>");
-  h+=D("Estructura de una secuencia de stories","<p>Una secuencia no es una story suelta: son de 3 a 8 stories con un hilo (3 es la versión corta, perfecta para empezar). El orden más seguro es: <b>gancho</b> (el problema y lo que se desea), <b>tutorial</b> (máximo 3 stories), <b>prueba social</b> y <b>llamada a la acción</b> con palabra clave, nunca con enlace. Cada story dura entre 7 y 15 segundos. Máximo dos vídeos a cámara seguidos.</p>");
-  h+=D("Tipos de secuencia para clientas",tipos("clientas"));
-  h+=D("Tipos de secuencia para el proyecto","<p>Cuentan cómo encaja el proyecto con Fam Team en una vida real. Nunca se habla de dinero. Solo una de ellas pide algo al final.</p>"+tipos("proyecto"));
-  h+=D("Un buen reel: lo que tiene que cumplir","<ul><li><b>Gancho de 3 segundos:</b> lo primero que se lee o se oye. Tiene que despertar curiosidad y que la persona piense «esa soy yo».</li><li><b>Una sola idea.</b> Se entiende en menos de 5 segundos de leer la pantalla.</li><li><b>Cuenta lo tuyo:</b> detalles de verdad (una hora, un sitio, un objeto) valen más que frases bonitas.</li><li><b>Cierre:</b> si es para crecer, invita a seguirte; si es para captar, termina con la palabra clave y lo que recibe.</li><li><b>Formatos sin cara</b> para empezar: manos, objetos, texto en pantalla. La cara llega cuando te sientas cómoda.</li></ul>");
+  h+=D("Estructura de una secuencia de stories","<p>Una secuencia son de 2 a 8 stories con un solo hilo. Con 3 tienes la versión corta, perfecta para empezar. El orden es siempre el mismo: <b>gancho</b>, <b>cómo era antes</b>, <b>cómo lo hago ahora</b>, hasta <b>tres consejos</b>, una <b>encuesta</b> y el <b>cierre</b>. Cada story se entiende sola, así que puedes quitar o poner las que quieras.</p><p>Cada story dura entre 7 y 15 segundos. Máximo dos vídeos a cámara seguidos. Nunca pongas enlaces: pide la palabra clave.</p>");
+  h+=D("Objetivos para clientas",'<ul><li><b>Que me conozca gente nueva.</b> Termina invitando a seguirte. Sin palabra clave.</li><li><b>Que me escriban.</b> Termina con la palabra clave y lo que le mandas.</li><li><b>Que confíen en mí.</b> Cuentas cómo lo haces tú y terminas con una encuesta.</li><li><b>Recomendar un producto.</b> Cómo usas tú el producto, con la palabra clave al final.</li><li><b>Resolver una duda.</b> La pregunta que más te hacen, respondida.</li><li><b>Invitar a mi reto</b> y <b>al taller del martes.</b> Con la palabra clave para mandarle cómo entrar.</li></ul>');
+  h+=D("Objetivos para el proyecto",'<p>Cuentan cómo encaja el proyecto con Fam Team en una vida real. Nunca se habla de dinero.</p><ul><li><b>Que me conozca gente nueva.</b> Tu día real, sin pedir nada.</li><li><b>Que me escriban.</b> Con palabra clave y algo útil que mandar.</li><li><b>Que confíen en mí.</b> Cómo lo encajas en tu vida, con una encuesta al final.</li><li><b>Resolver una duda o un miedo.</b> El tiempo, la vergüenza, la familia, si es fiable.</li><li><b>Invitar a una formación.</b> Con los días y la hora reales.</li></ul>');
+  h+=D("Un buen reel: lo que tiene que cumplir","<ul><li><b>Gancho de 3 segundos:</b> lo primero que se lee o se oye. Tiene que despertar curiosidad y que la persona piense «esa soy yo».</li><li><b>Una sola idea.</b> Se entiende en menos de 5 segundos de leer la pantalla.</li><li><b>Cuenta lo tuyo:</b> detalles de verdad (una hora, un sitio, un objeto) valen más que frases bonitas.</li><li><b>Cierre:</b> si buscas que te conozcan, invita a seguirte; si buscas que te escriban, termina con la palabra clave y lo que recibe.</li><li><b>Formatos sin cara</b> para empezar: manos, objetos, texto en pantalla. La cara llega cuando te sientas cómoda.</li></ul>");
   h+=D("Las tres palancas de las stories","<ul><li><b>Retención:</b> que la gente vea tus stories hasta el final. Lo consigues con gancho, hilo y curiosidad.</li><li><b>Respuestas:</b> que te contesten por mensaje. Una respuesta vale más que una encuesta.</li><li><b>Primera semana:</b> los nuevos seguidores tienen siete días en los que ven más tus stories. Aprovecha con una primera story visual y cercana.</li></ul><p>Una cuenta normal ve sus stories entre el 5 % y el 10 % de sus seguidores. Si tu secuencia es buena, ese número sube. Compruébalo en Mis números.</p>");
   h+=D("La llamada a la acción que funciona","<p>Fórmula: <b>beneficio</b> (lo que la persona consigue) + <b>promesa concreta</b> del recurso + <b>acción específica</b> (una palabra clave).</p><p>Ejemplo flojo: «te paso una guía». Ejemplo bueno: «si quieres tener una rutina de cinco minutos que sí hagas cada noche, comenta la palabra RUTINA y te envío mi mini guía».</p><p>Las palabras concretas funcionan mejor que las genéricas: NOCHE, REGALOS o PAUSA mejor que INFO.</p>");
-  h+=D("La semana en espiral","<p>Durante una semana repites <b>el mismo problema</b> de tu clienta, contado de formas distintas: un reel que la encuentra, stories que la acompañan y una llamada a la acción. Así te recuerdan y confían.</p><ul><li>Reels por la mañana y stories entre las 11:00 y las 14:00.</li><li>El sábado se descansa.</li><li>Como máximo 2 llamadas a la acción en las stories de la semana, y nunca dos el mismo día. El reel de captar también cuenta.</li><li>Una venta directa por semana como mucho.</li><li>Tres planes: Inicio (1 reel y 3 secuencias), Estándar (2 reels y 4 secuencias) y Completo (3 reels y 6 secuencias).</li></ul><p>Empieza con el plan Inicio. Cuando lo hagas con comodidad, sube al Estándar. Planifica, graba el lunes y publica a lo largo de la semana.</p>");
+  h+=D("La semana en espiral","<p>Durante una semana repites <b>el mismo tema</b>, contado de formas distintas: un reel que te descubre, stories que acompañan, un TikTok y una llamada a la acción. Así te recuerdan y te escriben. En <b>Semana</b>, al crear tu semana rápida, elige «Un tema toda la semana».</p><ul><li>Reels por la mañana y stories entre las 11:00 y las 14:00.</li><li>Un día de descanso.</li><li>Como mucho dos días con palabra clave en stories.</li><li>En TikTok, dos vídeos al día separados al menos 4 horas.</li></ul>");
   h+=D("Frases que Instagram penaliza","<ul><li>Nada de dinero, ingresos, comisiones ni capturas de pagos.</li><li>Nada de pérdida de peso, antes y después de cuerpo ni promesas de salud.</li><li>Con nutrición, solo sabor, preparación y rutina. Nunca un efecto en el cuerpo.</li><li>Urgencia solo si es real, con fecha verdadera.</li><li>El caso de una clienta, solo con su permiso por escrito.</li><li>Sin números ni comparaciones de cuerpo.</li></ul><p class=\"note\">El Revisor (Más) marca estas frases en tus textos y te propone cómo decirlo.</p>");
   h+=D("Glosario para empezar","<dl class='gl'>"+[["Story","Foto o vídeo que dura 24 horas en Instagram."],["Reel","Vídeo corto que Instagram enseña también a gente que no te sigue."],["Secuencia","Varias stories seguidas que cuentan una sola idea."],["Gancho","La primera frase o imagen: lo que hace que no pasen de largo."],["Llamada a la acción","Lo que le pides hacer a quien te ve, por ejemplo «comenta la palabra NOCHE»."],["Palabra clave","Una palabra que la persona comenta o responde para recibir el recurso."],["Recurso","Lo que mandas a cambio de la palabra clave: una guía, una lista, un audio."],["Hilo","El tema común que une tus publicaciones de la semana."],["Retención","Cuánta gente sigue viendo tu secuencia hasta el final."],["Prueba social","Mensajes o experiencias de otras personas que demuestran que lo que cuentas es real."],["POV","Vídeo en primera persona, como si la persona viera lo que tú ves."],["Detrás de cámaras","Mostrar cómo es tu día o cómo preparas algo, sin guion."],["Lifestyle","Contenido de tu vida diaria con una intención detrás."],["Objeción","Una duda que impide comprar o apuntarse: «es caro», «no tengo tiempo»."],["Cliente ideal","La persona a la que quieres ayudar. Para quien hablas."]].map(g=>'<dt>'+g[0]+'</dt><dd>'+g[1]+'</dd>').join("")+"</dl>");
   return h;
@@ -708,8 +703,8 @@ function viewGuia(){
 // ===== pestaña PERFIL =====
 function viewPerfil(){
   const P=ls("ft_perfil")||{},G=ls("ft_guiones")||[];
-  let h='<section class="panel"><h2>Tu perfil</h2><div class="grid3"><label>Tu nombre<input id="p_nombre" value="'+esc(P.nombre||"")+'"></label><label>Tu usuario de Instagram<input id="p_user" value="'+esc(P.user||"")+'" placeholder="@tuusuario" autocapitalize="none" autocomplete="off"><small>Sale al pie de tus tarjetas.</small></label><label>Tu teléfono para WhatsApp (opcional)<input id="p_tel" type="tel" inputmode="tel" value="'+esc(P.tel||"")+'" placeholder="612 345 678" autocomplete="off"><small>Se pone solo en los mensajes de Recursos. Se queda en este dispositivo.</small></label><label>Tu nivel'+sel("p_nivel",[["empiezo","Empiezo hoy"],["suelto","Me suelto"],["pro","Ya publico a diario"]],P.nivel||S.f.nivel)+'</label><label>Tono habitual'+sel("p_tono",Object.keys(DB.TONOS).map(k=>[k,DB.TONOS[k].n]),P.tono||S.f.tono)+'</label></div><div class="acts"><button class="btn" data-act="psave">Guardar perfil</button></div><p class="note">Todo se guarda solo en este navegador y no se envía a ninguna parte.</p></section>';
-  h+='<section class="panel"><h3>Mis guiones guardados</h3>'+(G.length?G.map((g,i)=>'<details class="gd2"><summary><b>'+esc(g.titulo)+'</b> <small>'+esc(g.fecha)+'</small></summary><pre>'+esc(g.texto)+'</pre><button class="mini" data-gcopy="'+i+'">Copiar</button> <button class="mini" data-gdel="'+i+'">Quitar</button></details>').join(""):'<p class="mut">Todavía no has guardado ninguno. Genera una secuencia y pulsa «Guardar».</p>')+'</section>';
+  let h='<section class="panel"><h2>Tu perfil</h2><div class="grid3"><label>Tu nombre<input id="p_nombre" value="'+esc(P.nombre||"")+'"></label><label>Tu usuario de Instagram<input id="p_user" value="'+esc(P.user||"")+'" placeholder="@tuusuario" autocapitalize="none" autocomplete="off"><small>Sale al pie de tus tarjetas.</small></label><label>Tu teléfono para WhatsApp (opcional)<input id="p_tel" type="tel" inputmode="tel" value="'+esc(P.tel||"")+'" placeholder="612 345 678" autocomplete="off"><small>Se pone solo en los mensajes de Recursos. Se queda en este dispositivo.</small></label><label>Tu nivel'+sel("p_nivel",[["empiezo","Empiezo hoy (3 stories)"],["suelto","Me suelto (4 stories)"],["pro","Ya publico a diario (5 stories)"]],P.nivel||S.f.nivel)+'<small>Es el número de stories que te propone Crear. Siempre puedes cambiarlo.</small></label></div><div class="acts"><button class="btn" data-act="psave">Guardar perfil</button></div><p class="note">Todo se guarda solo en este navegador y no se envía a ninguna parte.</p></section>';
+  h+='<section class="panel"><h3>Mis guiones guardados</h3>'+(G.length?G.map((g,i)=>'<details class="gd2"><summary><b>'+esc(g.titulo)+'</b> <small>'+esc(g.fecha)+'</small></summary><pre>'+esc(g.texto)+'</pre><button class="mini" data-gcopy="'+i+'">Copiar</button> <button class="mini" data-gdel="'+i+'">Quitar</button></details>').join(""):'<p class="mut">Todavía no has guardado ninguno. En Crear, al final de tu guion, pulsa «Guardar en mi cuenta».</p>')+'</section>';
   return h;
 }
 
@@ -737,7 +732,7 @@ document.addEventListener("click",e=>{
    case "regen":S.f.nonce++;S.res=genSeq(S.f,histSets());histCommit(S.res.used);render(true);break;
    case "copyseq":copy(scriptText(S.res));break;
    case "saveseq":saveSeq(S.res);break;
-   case "psave":{const p={nombre:$("#p_nombre").value,user:$("#p_user").value,tel:$("#p_tel").value.trim(),nivel:$("#p_nivel").value,tono:$("#p_tono").value};ls("ft_perfil",p);S.f.nivel=p.nivel;S.f.tono=p.tono;S.f.len=defLen(p.nivel);toast("Perfil guardado");break}
+   case "psave":{const p={nombre:$("#p_nombre").value,user:$("#p_user").value,tel:$("#p_tel").value.trim(),nivel:$("#p_nivel").value,tono:(ls("ft_perfil")||{}).tono||S.f.tono};ls("ft_perfil",p);if(S.c2)S.c2.n=defLen(p.nivel);S.f.nivel=p.nivel;S.f.tono=p.tono;S.f.len=defLen(p.nivel);toast("Perfil guardado");break}
   }
 });
 document.addEventListener("change",e=>{
@@ -745,7 +740,7 @@ document.addEventListener("change",e=>{
   if(id==="f_obj"){readCrear();setVia(viaOf(S.f.obj));render(true)}
   else if(id==="f_sit"||id==="f_prod"){readCrear();S.f.kw="";S.f.kwc="";render(true)}
   else if(id==="f_tono"||id==="f_len"||id==="f_fecha"||id==="f_dias"){readCrear()}
-  else if(e.target.name==="i_nivel"){S.f.nivel=e.target.value;S.f.len=defLen(S.f.nivel);const p=ls("ft_perfil")||{};p.nivel=S.f.nivel;ls("ft_perfil",p);render(true)}
+  else if(e.target.name==="i_nivel"){S.f.nivel=e.target.value;if(S.c2)S.c2.n=defLen(S.f.nivel);S.f.len=defLen(S.f.nivel);const p=ls("ft_perfil")||{};p.nivel=S.f.nivel;ls("ft_perfil",p);render(true)}
   else if(e.target.name==="f_nivel"){readCrear();S.f.len=defLen(S.f.nivel);render(true)}
 });
 document.addEventListener("input",e=>{
@@ -1917,11 +1912,13 @@ function redSeg(){
 
 // ---------- INICIO en modo TikTok ----------
 function viewHomeTT(nombre){
-  const B=(t,sub,tab,main)=>'<button class="hb'+(main?" main":"")+'" data-tab="'+tab+'"><b>'+t+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</button>';
+  const B=(t,sub,tab,main)=>'<button class="hb'+(main?" main":"")+'" '+(tab.indexOf("|")>0?'data-c2k="go" data-c2v="'+tab+'"':'data-tab="'+tab+'"')+'><b>'+t+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</button>';
   return '<section class="hero2"><p class="hi">'+(nombre?"Hola, "+esc(nombre):"Hola")+'</p><h2>¿Qué subes hoy?</h2></section>'
   +'<section class="panel hblk tt-menu">'
-  +B("Idea del día","Texto, qué grabar y la pregunta final","tt_idea",true)
-  +B("Stories para TikTok","2 o 3 stories que piden la palabra clave","tt_stories")
+  +B("Vídeo para el proyecto","Texto, qué grabar y la palabra clave","tt|proyecto|escriban",true)
+  +B("Vídeo para clientas","Un momento real con tu producto","tt|clientas|escriban")
+  +B("Stories para TikTok","De 2 a 8 stories que piden la palabra clave","st|proyecto|escriban")
+  +B("TikTok LIVE","Guion, preparación y normas para no tener problemas","tt_live")
   +B("Plantillas que funcionan","Rellenas los huecos y listo","tt_plantillas")
   +B("Mi historia en 60 segundos","El vídeo que fijas arriba del perfil","tt_historia")
   +B("Responder comentarios","«Información», «¿es fiable?» y más","tt_respuestas")
@@ -2515,11 +2512,669 @@ document.addEventListener("click",e=>{
 });
 Object.assign(VIEWS,{equipo:viewEquipo,eq_semana:viewEqSemana,eq_calendario:viewEqCalendario,eq_formaciones:viewEqFormaciones,eq_guias:viewEqGuias,eq_herramientas:viewEqHerramientas,eq_paises:viewEqPaises,eq_terminos:viewEqTerminos,eq_presentar:viewEqPresentar,eq_ventas:viewEqVentas,eq_normas:viewEqNormas});
 
+// ===== Fam Studio · CREAR (banco de paquetes) =====
+// Tres preguntas -> guion en 3 pasos. Todo el texto sale tal cual de DB.paquetes (escrito y revisado a mano):
+// aquí no se rellenan huecos, solo se eligen piezas y se pone la palabra clave.
+const C2=(function(){
+const PKS=(DB.paquetes||[]).filter(s=>s&&s.pk&&s.id);
+const PK={};PKS.forEach(s=>{PK[s.id]=s});
+const VIAS={clientas:{n:"Clientas",d:"Vender y recomendar productos"},proyecto:{n:"Proyecto",d:"Sumar gente al equipo"}};
+const OBJ={
+ clientas:[["conocer","Que me conozca gente nueva","«Tres errores al desmaquillarte que yo también hacía»"],
+  ["escriban","Que me escriban","«Escríbeme NOCHE y te mando mi rutina de 3 pasos»"],
+  ["confien","Que confíen en mí","«Así uso yo la base de verdad, con la luz del coche»"],
+  ["producto","Recomendar un producto","«El té de melocotón de mis cinco de la tarde»"],
+  ["duda","Resolver una duda que me hacen","«¿Y si tengo la piel sensible?»"],
+  ["reto","Invitar a mi reto","«El Reto 21 días contado por mí, sin rodeos»"],
+  ["taller","Invitar al taller del martes","«El martes a las 20:00 hay taller de producto por Zoom»"]],
+ proyecto:[["conocer","Que me conozca gente nueva","«Lo que nadie te cuenta de aprender redes a los 40»"],
+  ["escriban","Que me escriban","«Escríbeme MIO y te cuento cómo saqué mi rato»"],
+  ["confien","Que confíen en mí","«Mi martes real: Zoom a las 20:00 con la cena a medias»"],
+  ["duda","Resolver una duda o un miedo","«¿Y si no tengo tiempo?»"],
+  ["invitar","Invitar a una formación","«El miércoles a las 20:00 hay presentación por Zoom»"]]};
+const TIPOS=[["st","Stories"],["re","Reel"],["tt","TikTok"]];
+const WHEN=[["todo","Todo el año"],["temp","Esta temporada"],["fechas","Fechas que vienen"]];
+const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const AVISO=(DB.gamas&&DB.gamas.nutri&&DB.gamas.nutri.aviso)||"";
+const LBL={gancho:"Engancha",antes:"Cómo era antes",ahora:"Cómo lo hago ahora",valor:"Un consejo",pregunta:"Encuesta",cierre:{kw:"Pide la palabra",sigue:"Invita a seguirte",encuesta:"Pregunta y escucha"}};
+const SETS={2:["gancho","cierre"],3:["gancho","ahora","cierre"],4:["gancho","antes","ahora","cierre"],5:["gancho","antes","ahora","v0","cierre"],6:["gancho","antes","ahora","v0","v1","cierre"],7:["gancho","antes","ahora","v0","v1","v2","cierre"],8:["gancho","antes","ahora","v0","v1","v2","pregunta","cierre"]};
+const PERSON='<svg class="c2p" viewBox="0 0 100 120" aria-hidden="true"><circle cx="50" cy="34" r="22" fill="#fff"/><path d="M8 120c3-30 20-46 42-46s39 16 42 46z" fill="#fff"/></svg>';
+
+const st=()=>S.c2||(S.c2={t:"st",v:"clientas",o:"escriban",w:"todo",q:"",s:"",n:defLen(S.f&&S.f.nivel),kw:"",own:false,hook:-1,ci:0,ri:0,ti:0,res:false});
+const tipoCierre=o=>o==="conocer"?"sigue":o==="confien"?"encuesta":"kw";
+const objsVia=v=>OBJ[v].filter(o=>PKS.some(s=>s.via===v&&s.objetivos.indexOf(o[0])>=0));
+const objLabel=(v,o)=>((OBJ[v].find(x=>x[0]===o)||[])[1])||"";
+const isNutri=s=>/^(Nutrición|Reto)/.test(s.grupo)||(s.productos||[]).some(p=>PROD[p]&&PROD[p].gama==="nutri");
+const prodNames=s=>(s.productos||[]).map(p=>PROD[p]?PROD[p].nombre:"").filter(Boolean);
+const mesNow=()=>new Date().getMonth()+1;
+function cuando(s){
+  if(s.temporada==="todo el año"||!s.meses||s.meses.length>=12)return "todo";
+  const m=mesNow(),n1=m%12+1,n2=n1%12+1;
+  if(s.meses.indexOf(m)>=0)return "temp";
+  if(s.meses.indexOf(n1)>=0||s.meses.indexOf(n2)>=0)return "fechas";
+  return "";
+}
+const mesesTxt=s=>(s.meses||[]).length>=12?"":(s.meses||[]).map(m=>MES[m-1]).join(", ");
+function lista(c,w,q){
+  const qq=norm(q||"").trim().split(/\s+/).filter(Boolean);
+  return PKS.filter(s=>s.via===c.v&&s.objetivos.indexOf(c.o)>=0&&(qq.length?true:cuando(s)===w)
+    &&(!qq.length||qq.every(x=>norm([s.nombre,s.escena,s.grupo,s.recurso].join(" ")).indexOf(x)>=0)));
+}
+const dayKey=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+const sugerida=(L,c)=>L.length?L[hash(dayKey()+"|"+c.v+"|"+c.o)%L.length]:null;
+function asegurar(){
+  const c=st();
+  if(!VIAS[c.v])c.v="clientas";
+  const O=objsVia(c.v);if(!O.some(o=>o[0]===c.o))c.o=(O.find(o=>o[0]==="escriban")||O[0])[0];
+  if(!lista(c,c.w,"").length){const w=WHEN.map(x=>x[0]).find(w=>lista(c,w,"").length);if(w)c.w=w}
+  const s=PK[c.s];
+  if(!s||s.via!==c.v||s.objetivos.indexOf(c.o)<0){const L=lista(c,c.w,"");const g=sugerida(L,c)||PKS.find(x=>x.via===c.v&&x.objetivos.indexOf(c.o)>=0);c.s=g?g.id:"";c.kw="";c.own=false;c.hook=-1}
+  const S1=PK[c.s];
+  if(S1&&!c.kw)c.kw=S1.kw[0];
+  if(S1&&c.hook<0)c.hook=hash(dayKey()+S1.id)%S1.pk.ganchos.length;
+  if(tipoCierre(c.o)==="encuesta"&&c.n>7)c.n=7;
+  return S1;
+}
+// ---------- piezas ----------
+function rol(s,r,c){
+  const P=s.pk,ST=P.stories,tc=tipoCierre(c.o);
+  if(r==="gancho")return {r,lbl:LBL.gancho,txt:P.ganchos[c.hook%12].t,g:ST.gancho.graba,d:ST.gancho.dice};
+  if(r==="antes")return {r,lbl:LBL.antes,txt:ST.antes.texto,g:ST.antes.graba,d:ST.antes.dice};
+  if(r==="ahora"){const pr=c.o==="producto"&&P.producto_frase;return {r,lbl:pr?"Así lo uso yo":LBL.ahora,txt:pr?P.producto_frase:ST.ahora.texto,g:ST.ahora.graba,d:ST.ahora.dice}}
+  if(r[0]==="v"){const v=ST.valor[+r[1]];return {r,lbl:LBL.valor,txt:v.texto,g:v.graba,d:v.dice}}
+  if(r==="pregunta")return {r,lbl:LBL.pregunta,txt:ST.pregunta.texto,g:ST.pregunta.graba,d:"Aquí no hace falta que hables.",poll:ST.pregunta.opciones};
+  // cierre
+  if(tc==="kw")return {r,lbl:LBL.cierre.kw,txt:P.cierres_kw[c.ci%P.cierres_kw.length],g:ST.cierre.graba,d:ST.cierre.dice,kw:true};
+  if(tc==="sigue")return {r,lbl:LBL.cierre.sigue,txt:P.sigueme[c.ci%P.sigueme.length],g:ST.cierre.graba,d:"Aquí no hace falta que hables."};
+  return {r,lbl:LBL.cierre.encuesta,txt:ST.pregunta.texto,g:ST.cierre.graba,d:"Aquí no hace falta que hables.",poll:ST.pregunta.opciones};
+}
+const storiesDe=(s,c)=>SETS[c.n].map(r=>rol(s,r,c));
+const kwSmall=(s,red)=>(red==="tt"?"Comenta esta palabra y te mando ":"Escríbeme esta palabra y te mando ")+s.pk.recurso_corto+":";
+const ctaLine=(s,kw,red)=>(red==="tt"||red==="re"?"Comenta ":"Escríbeme ")+kw+" y te mando "+s.pk.recurso_corto+(red==="st"?".":" por privado.");
+// ---------- textos para copiar ----------
+function txtStories(s,c){
+  return storiesDe(s,c).map((x,i)=>"STORY "+(i+1)+" · "+x.lbl.toUpperCase()+"\nQué grabas: "+x.g+"\nQué escribes: "+x.txt+(x.kw?"\nAbajo, en grande: "+c.kw+" ("+kwSmall(s,"st")+")":"")+(x.poll?"\nEncuesta: "+x.poll.join(" / "):"")+"\nQué dices: "+x.d).join("\n\n");
+}
+function captionReel(s,c){
+  const r=s.pk.reels[c.ri%s.pk.reels.length],tc=tipoCierre(c.o);
+  return r.caption+"\n"+(tc==="kw"?ctaLine(s,c.kw,"re"):tc==="sigue"?s.pk.sigueme[0]:"")+(isNutri(s)&&s.via==="clientas"?"\n"+AVISO:"");
+}
+function txtReel(s,c){
+  const r=s.pk.reels[c.ri%s.pk.reels.length],tc=tipoCierre(c.o);
+  return "REEL · "+r.formato.toUpperCase()+"\nPortada: "+r.portada+"\n\n"+r.planos.map((p,i)=>"Plano "+(i+1)+" ("+p.seg+" s): "+p.graba+(p.texto?"\nTexto: "+p.texto:"")).join("\n\n")+(tc==="kw"?"\n\nPlano final: la palabra "+c.kw+" abajo, en grande.":"")+"\n\nDescripción:\n"+captionReel(s,c);
+}
+function descTT(s,c){const tc=tipoCierre(c.o);return (tc==="kw"?ctaLine(s,c.kw,"tt"):s.pk.sigueme[0])+(isNutri(s)&&s.via==="clientas"?" "+AVISO:"")}
+function txtTT(s,c){
+  const x=s.pk.tiktok[c.ti%s.pk.tiktok.length],tc=tipoCierre(c.o);
+  return "TIKTOK\nQué grabas (7 segundos, un solo plano): "+x.graba+"\nTexto arriba: "+x.pantalla+(tc==="kw"?"\nTexto abajo: Comenta "+c.kw:"")+"\nDescripción: "+descTT(s,c);
+}
+function txtGuia(s){const G=s.pk.guia;return G.entrega+"\n\n"+G.texto}
+// ---------- vista: preguntas ----------
+function viaCards(c){return '<div class="c2vias">'+Object.keys(VIAS).map(v=>'<button type="button" class="c2vc c2'+v[0]+(c.v===v?" on":"")+'" data-c2k="v" data-c2v="'+v+'" aria-pressed="'+(c.v===v)+'"><b>'+VIAS[v].n+'</b><small>'+VIAS[v].d+'</small></button>').join("")+'</div>'}
+const banner=c=>c.v==="proyecto"?'<div class="c2ban p">Creando para el proyecto <small>sumar gente al equipo</small></div>':'<div class="c2ban c">Creando para clientas <small>vender y recomendar</small></div>';
+const tipoTabs=c=>'<div class="c2tabs" role="group" aria-label="Qué vas a crear">'+TIPOS.map(t=>'<button type="button" class="'+(c.t===t[0]?"on":"")+'" data-c2k="t" data-c2v="'+t[0]+'" aria-pressed="'+(c.t===t[0])+'">'+t[1]+'</button>').join("")+'</div>';
+function sitBtn(s,c,sug){return '<button type="button" class="c2sit'+(s.id===c.s?" on":"")+'" data-c2k="s" data-c2v="'+esc(s.id)+'">'+esc(s.nombre)+(sug?'<span class="c2hoy">HOY</span>':'')+(mesesTxt(s)?'<span class="c2fecha">'+esc(mesesTxt(s))+'</span>':'')+'<small>'+esc(s.escena)+'</small></button>'}
+function sitsHtml(c){
+  const L=lista(c,c.w,c.q),sug=c.q?null:sugerida(L,c);
+  let h='<p class="c2ex">'+L.length+(L.length===1?' situación encaja':' situaciones encajan')+' con este objetivo'+(c.q?' y tu búsqueda':'')+'</p>';
+  if(!L.length)return h+'<p class="c2ex">Nada por aquí. Prueba otra pestaña o borra la búsqueda.</p>';
+  if(sug)h+='<div class="c2grp">Te sugerimos hoy</div>'+sitBtn(sug,c,true);
+  const G={};L.forEach(s=>{(G[s.grupo]=G[s.grupo]||[]).push(s)});
+  Object.keys(G).forEach(g=>{const open=!!c.q||G[g].some(s=>s.id===c.s&&(!sug||s.id!==sug.id));h+='<details class="c2gd"'+(open?" open":"")+'><summary>'+esc(g)+' <span>'+G[g].length+'</span></summary>'+G[g].map(s=>sitBtn(s,c,false)).join("")+'</details>'});
+  return h;
+}
+function viewForm(c){
+  const O=objsVia(c.v),ob=O.find(o=>o[0]===c.o)||O[0];
+  let h=tipoTabs(c);
+  h+='<section class="c2step"><div class="c2sn"><i>1</i><b>¿Para quién creas hoy?</b></div>'+viaCards(c)+'</section>';
+  h+='<section class="c2step"><div class="c2sn"><i>2</i><b>¿Qué quieres conseguir hoy?</b></div><div class="c2chips">'+O.map(o=>'<button type="button" class="c2ch'+(o[0]===c.o?" on":"")+'" data-c2k="o" data-c2v="'+o[0]+'">'+esc(o[1])+'</button>').join("")+'</div><p class="c2ex">Ejemplo: '+esc(ob[2])+'</p></section>';
+  h+='<section class="c2step"><div class="c2sn"><i>3</i><b>¿De qué hablas hoy?</b></div><div class="c2when">'+WHEN.map(w=>{const n=lista(c,w[0],"").length;return '<button type="button" class="'+(c.w===w[0]?"on":"")+'" data-c2k="w" data-c2v="'+w[0]+'"'+(n?'':' disabled')+'>'+w[1]+' <small>'+n+'</small></button>'}).join("")+'</div>'
+   +'<input id="c2q" class="c2q" type="search" placeholder="Busca: noche, café, tiempo, vergüenza…" value="'+esc(c.q)+'" autocomplete="off"><div id="c2sits">'+sitsHtml(c)+'</div></section>';
+  if(c.t==="st"){const mx=tipoCierre(c.o)==="encuesta"?7:8;h+='<details class="c2more"><summary>Más opciones (ya está lo recomendado)</summary><div class="c2grp">Número de stories</div><div class="c2chips">'+[2,3,4,5,6,7,8].filter(n=>n<=mx).map(n=>'<button type="button" class="c2ch'+(c.n===n?" on":"")+'" data-c2k="n" data-c2v="'+n+'">'+n+(n===3?" (recomendado)":"")+'</button>').join("")+'</div></details>'}
+  h+='<button type="button" class="c2go" data-c2k="ver">Ver mi guion</button>';
+  return h;
+}
+// ---------- vista: resultado ----------
+function storyBox(txt,kw,small,poll,cls){
+  return '<div class="c2story'+(cls?" "+cls:"")+'">'+PERSON+'<div class="c2hook"><span>'+esc(txt)+'</span></div>'+(poll?'<div class="c2poll">'+poll.map(o=>'<span>'+esc(o)+'</span>').join("")+'</div>':'')+(kw?'<div class="c2kwz"><small>'+esc(small)+'</small><strong class="c2kw">'+esc(kw)+'</strong></div>':'')+'</div>';
+}
+const t3=(n,lbl,txt,w)=>'<div class="c2t3'+(w?" w":"")+'"><em>'+n+' · '+lbl+'</em><p>'+txt+'</p></div>';
+function kwBox(s,c){
+  if(tipoCierre(c.o)!=="kw")return '<div class="c2note">Con este objetivo no hace falta palabra clave: '+(c.o==="conocer"?'terminas invitando a seguirte.':'terminas con una encuesta y escuchas lo que te contestan.')+'</div>';
+  const plat=c.t==="tt"?"tiktok":"meta";
+  const iss=kwIssues(c.kw,w=>[ctaLine(s,w,c.t)]);
+  return kwBoxHtml("c2","Tu palabra clave (cámbiala si quieres)",s.kw,c.own?"":c.kw,c.own?c.kw:"",kwWarnHtml(iss,plat),"Por ejemplo: "+s.kw[0]);
+}
+function resStories(s,c){
+  return storiesDe(s,c).map((x,i)=>{
+    const otro=x.r==="gancho"?'<button type="button" class="mini" data-c2k="hook">Otro gancho</button>':x.r==="cierre"&&!x.poll?'<button type="button" class="mini" data-c2k="ci">Otro cierre</button>':'';
+    return '<article class="c2card"><div class="c2h"><i>'+(i+1)+'</i><b>'+esc(x.lbl)+'</b>'+otro+'</div>'+storyBox(x.txt,x.kw?c.kw:"",kwSmall(s,"st"),x.poll)
+    +'<div class="c2three">'+t3(1,"Qué grabas",esc(x.g))+t3(2,"Qué escribes",esc(x.txt)+(x.kw?' · Escríbeme <span class="c2kw">'+esc(c.kw)+'</span>':''),1)+t3(3,"Qué dices",esc(x.d))+'</div>'
+    +(x.kw?'<div class="c2t3"><em>Pegatina</em><p>Caja de preguntas: «Escríbeme <span class="c2kw">'+esc(c.kw)+'</span>».</p></div>':'')+(x.poll?'<div class="c2t3"><em>Pegatina</em><p>Encuesta con dos opciones: '+x.poll.map(esc).join(" / ")+'.</p></div>':'')
+    +'<button type="button" class="mini" data-copy="'+esc(x.txt)+'">Copiar texto</button></article>';
+  }).join("");
+}
+function resReel(s,c){
+  const r=s.pk.reels[c.ri%s.pk.reels.length],tc=tipoCierre(c.o),P=r.planos;
+  const fin=P.length?P[P.length-1].seg.split("-")[1]:"10";
+  let h='<article class="c2card"><div class="c2h"><i>▶</i><b>Tu reel · '+esc(r.formato)+'</b><button type="button" class="mini" data-c2k="ri">Otra idea</button></div>'
+  +'<div class="c2meta"><span>'+P.length+' planos</span><span>Unos '+esc(String((+fin||10)+(tc==="kw"?2:0)))+' segundos</span><span>Sonido tranquilo de moda</span></div>'
+  +'<div class="c2t3"><em>Portada (lo que se ve en tu perfil)</em><p><b>'+esc(r.portada)+'</b></p></div>'
+  +'<div class="c2board">'+P.map((p,i)=>'<div class="c2fr"><em>'+(i+1)+'</em>'+(p.texto?'<p>'+esc(p.texto)+'</p>':'')+'</div>').join("")+(tc==="kw"?'<div class="c2fr"><em>'+(P.length+1)+'</em><div class="c2kwm c2kw">'+esc(c.kw)+'</div></div>':'')+'</div>'
+  +'<div class="c2t3"><em>1 · Qué grabas, plano a plano</em>'+P.map((p,i)=>'<div class="c2pl"><i>'+(i+1)+'</i><span>'+esc(p.graba)+' <small>('+esc(p.seg)+' s)</small>'+(p.texto?'<br><b>Texto:</b> '+esc(p.texto):'')+'</span></div>').join("")+(tc==="kw"?'<div class="c2pl"><i>'+(P.length+1)+'</i><span>Plano final con la palabra <b class="c2kw">'+esc(c.kw)+'</b> abajo, en grande (2 s).</span></div>':'')+'</div>'
+  +'<div class="c2t3 w"><em>2 · Descripción del reel</em><p>'+esc(captionReel(s,c)).replace(/\n/g,"<br>")+'</p></div>'
+  +'<div class="c2note">Graba de día, con luz de ventana. El texto de cada plano se tiene que leer en 3 segundos.'+(isNutri(s)&&s.via==="clientas"?' Al hablar de un complemento, deja el aviso en la descripción.':'')+'</div>'
+  +'<button type="button" class="mini" data-copy="'+esc(txtReel(s,c))+'">Copiar todo el reel</button></article>';
+  return h;
+}
+function resTT(s,c){
+  const x=s.pk.tiktok[c.ti%s.pk.tiktok.length],tc=tipoCierre(c.o),fm={clip_texto:"Clip con texto",esta_soy_yo:"Esta soy yo que…",humor_vida:"Humor de la vida real"}[x.formato]||"Clip";
+  return '<article class="c2card"><div class="c2h"><i>▶</i><b>Tu TikTok · '+esc(fm)+'</b><button type="button" class="mini" data-c2k="ti">Otra idea</button></div>'
+  +'<div class="c2meta"><span>7 segundos</span><span>1 plano, sin cortes</span><span>No hace falta hablar</span></div>'
+  +storyBox(x.pantalla,tc==="kw"?c.kw:"",tc==="kw"?kwSmall(s,"tt"):"",null,"tt")
+  +'<div class="c2tl"><div class="c2tlb"><span>Texto en pantalla todo el vídeo</span></div><div class="c2tlb s"><span>Sonido de moda bajito</span></div><div class="c2tlx"><b>0 s</b><b>3 s</b><b>7 s</b></div></div>'
+  +'<div class="c2how"><div class="c2hw"><i>1</i><div><b>Graba 7 segundos</b><p>'+esc(x.graba)+' Móvil apoyado, con luz de día.</p></div></div>'
+  +'<div class="c2hw"><i>2</i><div><b>Pon este texto arriba</b><p class="big">'+esc(x.pantalla)+'</p><p>Toca «Aa», pega el texto y súbelo a la parte de arriba. Que no tape tu cara.</p></div></div>'
+  +(tc==="kw"?'<div class="c2hw"><i>3</i><div><b>Pon la palabra abajo</b><p>Otro texto en grande, en la parte de abajo: «Comenta <span class="c2kw">'+esc(c.kw)+'</span>».</p></div></div>':'')
+  +'<div class="c2hw"><i>'+(tc==="kw"?4:3)+'</i><div><b>Sonido y descripción</b><p>Elige un sonido en tendencia y bájale el volumen. Descripción: «'+esc(descTT(s,c)).replace(/(Comenta )([^ ]+)/,'$1<span class="c2kw">$2</span>')+'»</p></div></div>'
+  +'<div class="c2hw"><i>'+(tc==="kw"?5:4)+'</i><div><b>Publica</b><p>'+(s.via==="clientas"&&(s.productos||[]).length?'Activa «Revelar contenido comercial». ':'')+'Sube dos vídeos al día, separados al menos 4 horas.</p></div></div></div>'
+  +'<div class="c2note"><b>Por qué funciona:</b> el texto tarda más en leerse que el vídeo en acabar, así que lo ven dos veces.'+(s.via==="proyecto"?' <b>Nunca</b> expliques el proyecto en TikTok: eso va por WhatsApp.':'')+'</div>'
+  +'<button type="button" class="mini" data-copy="'+esc(txtTT(s,c))+'">Copiar texto y descripción</button></article>';
+}
+function resGuia(s,c){
+  const G=s.pk.guia,tc=tipoCierre(c.o);
+  return '<details class="c2card c2guia"'+(tc==="kw"?"":"")+'><summary><b>'+(tc==="kw"?"Lo que mandas cuando te escriban":"Si alguien te escribe por esto")+'</b><small>'+esc(cap(s.pk.recurso_corto))+'</small></summary>'
+  +'<div class="c2t3"><em>1 · Mensaje con la guía</em><p>'+esc(G.entrega)+'</p></div><pre class="c2pre">'+esc(G.texto)+'</pre>'
+  +'<button type="button" class="mini" data-copy="'+esc(txtGuia(s))+'">Copiar mensaje y guía</button>'
+  +'<div class="c2t3"><em>2 · A los 2 o 3 días</em><p>'+esc(G.seguimiento)+'</p></div><button type="button" class="mini" data-copy="'+esc(G.seguimiento)+'">Copiar seguimiento</button>'
+  +'<div class="c2t3"><em>3 · Si sigue la conversación</em><p>Pásala a WhatsApp con un mensaje corto y sin prisa.</p></div></details>';
+}
+function resExtras(s){
+  const P=s.pk.planos,pr=prodNames(s);
+  return '<details class="c2card"><summary><b>Más ideas de qué grabar</b><small>sin cara, con soltura o a cámara</small></summary>'
+  +[["sin_cara","Sin enseñar la cara"],["soltura","Se te ve, pero no hablas"],["camara","Hablando a cámara"]].map(k=>'<div class="c2t3"><em>'+k[1]+'</em><p>'+P[k[0]].map(esc).join("<br>")+'</p></div>').join("")
+  +'<div class="c2t3"><em>Otros ganchos para esta situación</em><p>'+s.pk.ganchos.map(g=>esc(g.t)).join("<br>")+'</p></div></details>'
+  +(pr.length?'<div class="c2note"><b>Productos de esta situación:</b> '+pr.map(esc).join(", ")+'.</div>':'')
+  +(isNutri(s)&&s.via==="clientas"?'<div class="c2note">Al hablar de nutrición, solo sabor, preparación, momento y rutina. Si nombras un complemento, añade: «'+AVISO+'»</div>':'');
+}
+function txtTodo(s,c){
+  const head=(c.t==="st"?c.n+" STORIES":c.t==="re"?"REEL":"TIKTOK")+" · "+objLabel(c.v,c.o)+" · "+s.nombre;
+  const body=c.t==="st"?txtStories(s,c):c.t==="re"?txtReel(s,c):txtTT(s,c);
+  return head+"\n\n"+body+(tipoCierre(c.o)==="kw"?"\n\nLO QUE MANDAS\n"+txtGuia(s)+"\n\nSEGUIMIENTO\n"+s.pk.guia.seguimiento:"");
+}
+function viewRes(c,s){
+  let h='<button type="button" class="back" data-c2k="edit">‹ Cambiar las respuestas</button>'+tipoTabs(c)+banner(c);
+  h+='<div class="c2sum"><b>'+(c.t==="st"?c.n+" stories":c.t==="re"?"Un reel":"Un vídeo de TikTok")+'</b>'+esc(objLabel(c.v,c.o))+' · '+esc(s.nombre)+'</div>';
+  if(c.t==="st")h+='<div class="c2chips c2nst" aria-label="Número de stories">'+[2,3,4,5,6,7,8].filter(n=>n<=(tipoCierre(c.o)==="encuesta"?7:8)).map(n=>'<button type="button" class="c2ch'+(c.n===n?" on":"")+'" data-c2k="n" data-c2v="'+n+'">'+n+'</button>').join("")+'<small>stories</small></div>';
+  h+=kwBox(s,c);
+  h+=c.t==="st"?resStories(s,c):c.t==="re"?resReel(s,c):resTT(s,c);
+  h+=resGuia(s,c)+resExtras(s);
+  h+=(typeof PL!=="undefined"?PL.resBox(c,s):"");
+  h+='<div class="c2acts"><button type="button" class="c2go" data-copy="'+esc(txtTodo(s,c))+'">Copiar todo</button><button type="button" class="mini" data-c2k="save">Guardar en mi cuenta</button></div>';
+  h+='<div class="c2chk"><b>Antes de publicar</b><div>El texto se lee bien y no tapa tu cara</div>'+(tipoCierre(c.o)==="kw"?'<div>La palabra clave se lee bien abajo</div><div>Tienes preparado el mensaje con la guía</div>':'<div>Vas a contestar a quien te responda</div>')+'</div>';
+  return h;
+}
+// guion de solo lectura (para Mi semana): mismas tarjetas que en Crear, sin los botones que cambian Crear
+function guionRO(it){
+  const s=PK[it.s];if(!s)return "";
+  const c={t:it.t,v:it.v,o:s.objetivos.indexOf(it.o)>=0?it.o:s.objetivos[0],s:it.s,n:Math.max(2,Math.min(8,+it.n||3)),kw:it.kw||s.kw[0],hook:(+it.hook||0)%12,ci:+it.ci||0,ri:+it.ri||0,ti:+it.ti||0};
+  if(tipoCierre(c.o)==="encuesta"&&c.n>7)c.n=7;
+  let h=c.t==="st"?resStories(s,c):c.t==="re"?resReel(s,c):resTT(s,c);
+  h=h.replace(/<button type="button" class="mini" data-c2k="(hook|ci|ri|ti)">[^<]*<\/button>/g,"");
+  return h+resGuia(s,c)+'<button type="button" class="c2go" data-copy="'+esc(txtTodo(s,c))+'">Copiar todo este guion</button>';
+}
+function viewCrear2(){
+  if(!PKS.length)return '<section class="panel"><h2>Crear</h2><p class="lead">No se ha cargado el banco de ideas. Cierra y vuelve a abrir la app.</p></section>';
+  const c=st(),s=asegurar();
+  return '<div class="c2">'+(typeof PL!=="undefined"?PL.destino(c):"")+(c.res&&s?viewRes(c,s):viewForm(c))+'</div>';
+}
+// ---------- SEMANA: una situación toda la semana, cada día una pieza distinta del mismo paquete ----------
+const PLAN=[["Lunes","st","escriban"],["Martes","re","conocer"],["Miércoles","st","confien"],["Jueves","tt","escriban"],["Viernes","re","producto"],["Sábado","",""],["Domingo","st","conocer"]];
+function planDe(s){
+  const alt=o=>s.objetivos.indexOf(o)>=0?o:o==="producto"?(["invitar","reto","taller","duda","escriban"].find(x=>s.objetivos.indexOf(x)>=0)||s.objetivos[0]):(s.objetivos.indexOf("escriban")>=0?"escriban":s.objetivos[0]);
+  return PLAN.map((p,i)=>p[1]?{dia:p[0],t:p[1],o:alt(p[2]),i}:{dia:p[0],t:"",o:"",i});
+}
+function viewSemana2(){
+  const c=st(),W=S.c2w||(S.c2w={v:c.v,s:""});
+  const L=PKS.filter(s=>s.via===W.v&&(cuando(s)==="todo"||cuando(s)==="temp"));
+  let s=PK[W.s];if(!s||s.via!==W.v){s=sugerida(L,{v:W.v,o:"semana"})||L[0];W.s=s?s.id:""}
+  let h='<section class="panel"><h2>Mi semana</h2><p class="lead">Un solo tema toda la semana: cada día una pieza distinta del mismo paquete. Así tu gente lo ve varias veces y te escribe.</p>'
+  +'<div class="c2vias">'+Object.keys(VIAS).map(v=>'<button type="button" class="c2vc c2'+v[0]+(W.v===v?" on":"")+'" data-c2k="wv" data-c2v="'+v+'"><b>'+VIAS[v].n+'</b><small>'+VIAS[v].d+'</small></button>').join("")+'</div>'
+  +'<label class="c2lbl">Tema de la semana<select id="c2ws">'+[...new Set(L.map(x=>x.grupo))].map(g=>'<optgroup label="'+esc(g)+'">'+L.filter(x=>x.grupo===g).map(x=>'<option value="'+esc(x.id)+'"'+(x.id===W.s?" selected":"")+'>'+esc(x.nombre)+'</option>').join("")+'</optgroup>').join("")+'</select></label></section>';
+  if(!s)return h;
+  h+='<section class="panel"><h3>'+esc(s.nombre)+'</h3><p class="mut">Palabra clave de la semana: <b>'+esc(s.kw[0])+'</b> · Lo que mandas: '+esc(s.pk.recurso_corto)+'</p>'
+  +planDe(s).map(d=>d.t?'<div class="c2day"><b>'+d.dia+'</b><span>'+({st:"Stories",re:"Reel",tt:"TikTok"}[d.t])+' · '+esc(objLabel(s.via,d.o))+'</span><button type="button" class="mini" data-c2k="open" data-c2v="'+d.t+'|'+d.o+'|'+esc(s.id)+'|'+d.i+'">Abrir guion</button></div>':'<div class="c2day off"><b>'+d.dia+'</b><span>Descansas. Contesta mensajes si te apetece.</span></div>').join("")
+  +'<p class="note">Reels por la mañana y stories entre las 11:00 y las 14:00. Como mucho dos días con palabra clave en stories.</p></section>';
+  return h;
+}
+// ---------- SITUACIONES (Más) ----------
+function viewSits2(){
+  const v=S.c2sv||"clientas",q=S.c2sq||"";
+  const qq=norm(q).trim().split(/\s+/).filter(Boolean);
+  const L=PKS.filter(s=>s.via===v&&(!qq.length||qq.every(x=>norm([s.nombre,s.escena,s.grupo,s.recurso].join(" ")).indexOf(x)>=0)));
+  const G={};L.forEach(s=>{(G[s.grupo]=G[s.grupo]||[]).push(s)});
+  return '<section class="panel"><h2>Situaciones</h2><p class="lead">'+PKS.length+' momentos de la vida real, cada uno con sus ganchos, stories, reels, TikTok y la guía que mandas.</p><div class="c2vias">'+Object.keys(VIAS).map(x=>'<button type="button" class="c2vc c2'+x[0]+(v===x?" on":"")+'" data-c2k="sv" data-c2v="'+x+'"><b>'+VIAS[x].n+'</b><small>'+PKS.filter(s=>s.via===x).length+' situaciones</small></button>').join("")+'</div><input id="c2sq" class="c2q" type="search" placeholder="Busca una situación" value="'+esc(q)+'" autocomplete="off"></section>'
+  +'<div id="c2slist">'+sitsListHtml(G,q)+'</div>';
+}
+function sitsListHtml(G,q){return Object.keys(G).map(g=>'<details class="panel c2gd"'+(q?" open":"")+'><summary>'+esc(g)+' <span>'+G[g].length+'</span></summary>'+G[g].map(s=>'<div class="c2srow"><b>'+esc(s.nombre)+'</b><small>'+esc(s.escena)+'</small><small>Palabra clave: <b>'+esc(s.kw[0])+'</b> · Mandas: '+esc(s.pk.recurso_corto)+'</small><button type="button" class="mini" data-c2k="use" data-c2v="'+esc(s.id)+'">Crear con esta</button></div>').join("")+'</details>').join("")||'<p class="mut center">Nada con esa búsqueda.</p>'}
+// ---------- eventos ----------
+function abrir(t,v,o,sid,extra){
+  const c=st();c.t=t||c.t;c.v=v||c.v;c.o=o||c.o;c.q="";c.res=!!sid;
+  if(sid){const s=PK[sid];if(s){c.s=s.id;c.v=s.via;c.w=cuando(s)||"todo";c.kw=s.kw[0];c.own=false;c.hook=-1;if(s.objetivos.indexOf(c.o)<0)c.o=s.objetivos[0]}}
+  else c.s="";
+  if(extra!=null){const i=+extra||0;c.hook=(i*5)%12;c.ri=i%3;c.ti=i%5;c.ci=i%3}
+  else{c.ri=0;c.ti=0;c.ci=0}
+  go("crear");
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("button[data-c2k]");if(!b)return;
+  const c=st(),k=b.dataset.c2k,v=b.dataset.c2v;
+  switch(k){
+   case "t":c.t=v==="re"||v==="tt"?v:"st";render(true);break;
+   case "v":if(VIAS[v]&&c.v!==v){c.v=v;c.s="";c.kw="";c.q="";}render(true);break;
+   case "o":c.o=v;c.s="";c.kw="";render(true);break;
+   case "w":c.w=v;c.q="";c.s="";c.kw="";render(true);break;
+   case "s":if(PK[v]){c.s=v;c.kw=PK[v].kw[0];c.own=false;c.hook=-1;c.ci=0;c.ri=0;c.ti=0}render(true);break;
+   case "n":c.n=Math.max(2,Math.min(8,+v||3));render(true);break;
+   case "ver":c.res=true;render();break;
+   case "edit":c.res=false;render();break;
+   case "hook":c.hook=(c.hook+1)%12;render(true);break;
+   case "ci":c.ci++;render(true);break;
+   case "ri":c.ri++;render(true);break;
+   case "ti":c.ti++;render(true);break;
+   case "save":{const s=PK[c.s];if(!s)break;const G=ls("ft_guiones")||[];G.unshift({titulo:({st:"Stories",re:"Reel",tt:"TikTok"}[c.t])+" · "+s.nombre,fecha:new Date().toLocaleDateString("es-ES"),texto:txtTodo(s,c)});ls("ft_guiones",G.slice(0,40));toast("Guardado en Mi cuenta");break}
+   case "go":{const p=String(v||"").split("|");abrir(p[0],p[1],p[2],"");break}
+   case "use":{const s=PK[v];if(s)abrir(st().t,s.via,s.objetivos.indexOf(st().o)>=0?st().o:(s.objetivos.indexOf("escriban")>=0?"escriban":s.objetivos[0]),s.id);break}
+   case "open":{const p=String(v||"").split("|");abrir(p[0],null,p[1],p[2],p[3]);break}
+   case "wv":{const W=S.c2w||(S.c2w={});W.v=v==="proyecto"?"proyecto":"clientas";W.s="";render(true);break}
+   case "sv":S.c2sv=v==="proyecto"?"proyecto":"clientas";S.c2sq="";render(true);break;
+  }
+});
+document.addEventListener("input",e=>{
+  const el=e.target;if(!el)return;
+  if(el.id==="c2q"){const c=st();c.q=el.value.slice(0,40);const box=document.getElementById("c2sits");if(box)box.innerHTML=sitsHtml(c);return}
+  if(el.id==="c2sq"){S.c2sq=el.value.slice(0,40);const v=S.c2sv||"clientas",qq=norm(S.c2sq).trim().split(/\s+/).filter(Boolean);const L=PKS.filter(s=>s.via===v&&(!qq.length||qq.every(x=>norm([s.nombre,s.escena,s.grupo,s.recurso].join(" ")).indexOf(x)>=0)));const G={};L.forEach(s=>{(G[s.grupo]=G[s.grupo]||[]).push(s)});const box=document.getElementById("c2slist");if(box)box.innerHTML=sitsListHtml(G,S.c2sq)}
+});
+document.addEventListener("change",e=>{
+  if(e.target&&e.target.id==="c2ws"){const W=S.c2w||(S.c2w={});W.s=e.target.value;render(true)}
+});
+KWT.c2=(kw,own)=>{
+  const c=st(),s=PK[c.s];if(!s)return;
+  const prev=c.kw;
+  c.kw=kw||s.kw[0];c.own=!!own&&!!kw;
+  document.querySelectorAll(".c2 .c2kw").forEach(x=>{x.textContent=c.kw});
+  document.querySelectorAll(".c2 [data-copy]").forEach(x=>{x.dataset.copy=x.classList.contains("c2go")?txtTodo(s,c):kwSwap(x.dataset.copy,prev,c.kw)});
+  kwShowWarn("c2",kwIssues(c.kw,w=>[ctaLine(s,w,c.t)]),c.t==="tt"?"tiktok":"meta");
+};
+Object.assign(VIEWS,{crear:viewCrear2,semana:viewSemana2,situaciones:viewSits2});
+return {guionRO,PK,PKS,abrir,storiesDe,txtTodo,lista,asegurar,cuando,objLabel,tipoCierre,objsVia,sugerida,st};
+})();
+
+// ===== Fam Studio · TikTok LIVE, Prospectar, Beauty Party, Reto, Embarazo, Ganchos, 5·5·5 y búsqueda por palabra =====
+// Todo el contenido llega de DB.extra y DB.paquetes (JSON descifrado). Todo texto pasa por esc().
+const XT=(function(){
+const X=DB.extra||{};
+const LIVE=X.tiktok_live||{},PRO=X.prospectar||{},BP=X.beautyparty||{},NI=X.nutri_interna||{};
+const ul=a=>(a&&a.length)?'<ul class="xul">'+a.map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul>':"";
+const ol=a=>(a&&a.length)?'<ol class="xol">'+a.map(t=>'<li>'+esc(t)+'</li>').join("")+'</ol>':"";
+const cp=t=>'<button type="button" class="mini" data-copy="'+esc(t)+'">Copiar</button>';
+const msgs=a=>(a||[]).map(t=>'<div class="xmsg"><p>'+esc(t)+'</p>'+cp(t)+'</div>').join("");
+const P=(t,b,cls)=>'<section class="panel'+(cls?" "+cls:"")+'">'+(t?'<h3>'+esc(t)+'</h3>':'')+b+'</section>';
+const D=(t,b,open)=>'<details class="panel xd"'+(open?" open":"")+'><summary>'+esc(t)+'</summary>'+b+'</details>';
+const H=(t,sub,badge)=>'<section class="panel xh">'+(badge?'<span class="rbadge">'+esc(badge)+'</span>':'')+'<h2>'+esc(t)+'</h2>'+(sub?'<p class="lead">'+esc(sub)+'</p>':'')+'</section>';
+const prodN=id=>PROD[id]?PROD[id].nombre:"";
+const linkA=(l,u)=>{const v=linkOk(u);return v?'<a class="eql" href="'+esc(v)+'" target="_blank" rel="noopener noreferrer"><span class="eqlt"><b>'+esc(l)+'</b><small>'+esc(new URL(v).hostname)+'</small></span><span class="eqlo">Abrir</span></a>':""};
+
+// ---------- TikTok LIVE ----------
+function viewLive(){
+  const g=S.xlive||(S.xlive=(LIVE.guiones||[])[0]?LIVE.guiones[0].id:"");
+  const G=(LIVE.guiones||[]).find(x=>x.id===g)||(LIVE.guiones||[])[0];
+  let h=H("TikTok LIVE",LIVE.intro||"");
+  h+=P("Antes de empezar: lo que pide TikTok",'<dl class="gl">'+(LIVE.requisitos||[]).map(r=>'<dt>'+esc(r.t)+'</dt><dd>'+esc(r.d)+'</dd>').join("")+'</dl>');
+  h+=D("Prepara tu directo (lista para marcar)",'<ul class="xchk">'+(LIVE.antes||[]).map(t=>'<li>'+esc(t)+'</li>').join("")+'</ul>',true);
+  if(G){
+    h+='<section class="panel"><h3>Guion de tu directo</h3><div class="chips">'+(LIVE.guiones||[]).map(x=>'<button type="button" class="chip'+(x.id===G.id?" on":"")+'" data-xk="live" data-xv="'+esc(x.id)+'">'+esc(x.titulo)+' <small>· '+(x.para==="proyecto"?"Proyecto":"Clientas")+'</small></button>').join("")+'</div>'
+    +'<p class="mut">'+(G.para==="proyecto"?"Para el proyecto":"Para clientas")+' · '+esc(G.duracion||"")+'</p>'
+    +G.tramos.map(t=>'<div class="xtramo"><span class="xmin">'+esc(t.min)+' min</span><div><b>'+esc(t.titulo)+'</b><p>'+esc(t.que_hacer)+'</p><p class="xdi">«'+esc(t.que_decir)+'»</p></div></div>').join("")
+    +(G.para==="proyecto"?'<p class="note"><b>Recuerda:</b> en TikTok nunca explicas el proyecto. Si alguien pregunta, le dices que comente la palabra y se lo cuentas después por privado o por WhatsApp.</p>':'<p class="note">Si enseñas productos, activa antes el aviso de contenido comercial.</p>')
+    +'<button type="button" class="mini" data-copy="'+esc(G.titulo+"\n\n"+G.tramos.map(t=>t.min+" min · "+t.titulo+"\n"+t.que_hacer+"\n«"+t.que_decir+"»").join("\n\n"))+'">Copiar el guion</button></section>';
+  }
+  const F=LIVE.frases||{};
+  h+=D("Frases que te sacan del apuro",[["abrir","Para empezar mientras entra gente"],["interaccion","Para que comenten"],["palabra_clave","Para pedir la palabra clave"],["cerrar","Para despedirte"]].map(k=>'<h4 class="xh4">'+k[1]+'</h4>'+msgs(F[k[0]])).join(""));
+  h+=P("Lo que sí ayuda",ul(LIVE.si));
+  h+=P("Lo que no se hace en un LIVE",(LIVE.no||[]).map(n=>'<div class="xno"><b>'+esc(n.t)+'</b><p>'+esc(n.por_que)+'</p></div>').join(""),"xnop");
+  h+=P("Cuando acabas",ol(LIVE.despues));
+  h+=D("Si te restringen el LIVE",ol(LIVE.si_te_restringen));
+  h+=D("De dónde sale esta información",'<p class="mut">Páginas oficiales de TikTok consultadas el '+esc(((LIVE.fuentes||[])[0]||{}).consultado||"")+'. TikTok cambia sus normas: si algo no cuadra con lo que ves en tu app, manda la app.</p><div class="eqls">'+(LIVE.fuentes||[]).map(f=>linkA(f.t,f.u)).join("")+'</div>');
+  return h;
+}
+
+// ---------- Prospectar ----------
+function viewPros(){
+  let h=H("Prospectar",PRO.intro||"","Solo para el equipo");
+  h+=P("Cambia tu mentalidad",'<dl class="gl">'+(PRO.mentalidad||[]).map(x=>'<dt>'+esc(x.t)+'</dt><dd>'+esc(x.d)+'</dd>').join("")+'</dl>');
+  const F=PRO.franc||{};
+  h+=P("Tu lista F.R.A.N.C.",'<p>'+esc(F.intro||"")+'</p>'+(F.letras||[]).map(l=>'<div class="xfr"><span class="xlet">'+esc(l.l)+'</span><div><b>'+esc(l.palabra)+'</b><p>'+esc(l.d)+'</p>'+(l.ejemplos&&l.ejemplos.length?'<small class="mut">'+l.ejemplos.map(esc).join(" · ")+'</small>':'')+'</div></div>').join("")+(F.reto?'<p class="note"><b>Reto:</b> '+esc(F.reto)+'</p>':''));
+  h+=P("El método AIDA",(PRO.aida||[]).map(l=>'<div class="xfr"><span class="xlet">'+esc(l.l)+'</span><div><b>'+esc(l.palabra)+'</b><p>'+esc(l.d)+'</p><p class="xdi">«'+esc(l.ejemplo)+'»</p></div></div>').join(""));
+  h+=P("Las 5 C",'<dl class="gl">'+(PRO.cinco_c||[]).map(x=>'<dt>'+esc(x.c)+'</dt><dd>'+esc(x.d)+'</dd>').join("")+'</dl>');
+  const V=PRO.no_vomites||{};
+  if(V.t)h+=P(V.t,'<p>'+esc(V.d)+'</p><div class="xmal"><b>Así no</b><p>'+esc(V.mal)+'</p></div><div class="xbien"><b>Así sí</b><p>'+esc(V.bien)+'</p></div>');
+  h+=(PRO.pasos||[]).map((p,i)=>D(p.paso,'<p class="mut">'+esc(p.objetivo)+'</p>'+msgs(p.mensajes),i===0)).join("");
+  const Dd=PRO.diario||{};
+  if(Dd.items)h+=P("Tu rutina diaria "+(Dd.titulo||""),'<p>'+esc(Dd.intro||"")+'</p><dl class="gl">'+Dd.items.map(x=>'<dt>'+esc(x.t)+'</dt><dd>'+esc(x.d)+'</dd>').join("")+'</dl><div class="acts"><button type="button" class="btn" data-tab="numeros">Apuntar mi 5·5·5 de hoy</button></div>');
+  if(PRO.extra&&PRO.extra.length)h+=P("Para no olvidar",'<dl class="gl">'+PRO.extra.map(x=>'<dt>'+esc(x.t)+'</dt><dd>'+esc(x.d)+'</dd>').join("")+'</dl>');
+  return h;
+}
+
+// ---------- Beauty Party ----------
+function viewBeauty(){
+  const k="fs_bp_chk",done=ls(k)||{};
+  let h=H("Mi Beauty Party",BP.intro||"","Solo para el equipo");
+  if(BP.tipos)h+=P("Elige el tipo de fiesta",'<dl class="gl">'+BP.tipos.map(t=>'<dt>'+esc(t.t)+'</dt><dd>'+esc(t.d)+'</dd>').join("")+'</dl>');
+  h+=(BP.pasos||[]).map((p,i)=>D(p.titulo,'<ul class="xtodo">'+p.tareas.map((t,j)=>{const id=i+"_"+j;return '<li><button type="button" class="xtk'+(done[id]?" on":"")+'" data-xk="bp" data-xv="'+id+'" aria-pressed="'+(!!done[id])+'"><span></span>'+esc(t)+'</button></li>'}).join("")+'</ul>',i===0)).join("");
+  h+=D("Invitaciones por WhatsApp",msgs(BP.invitacion)+(BP.recordatorio?'<h4 class="xh4">El día antes</h4>'+msgs(BP.recordatorio):''));
+  h+=D("Material",ul(BP.material));
+  h+=P("Higiene: nada se comparte",ul(BP.higiene),"xnop");
+  h+=D("Las estaciones, por orden",(BP.estaciones||[]).map((e,i)=>'<div class="xfr"><span class="xlet">'+(i+1)+'</span><div><b>'+esc(e.t)+'</b><p>'+esc(e.d)+'</p>'+(e.productos&&e.productos.length?'<small class="mut">'+e.productos.map(prodN).filter(Boolean).map(esc).join(" · ")+'</small>':'')+'</div></div>').join(""));
+  h+=P("El guion de la tarde (unos 90 minutos)",(BP.guion||[]).map(t=>'<div class="xtramo"><span class="xmin">'+esc(t.min)+' min</span><div><b>'+esc(t.tramo)+'</b><p>'+esc(t.que_hacer)+'</p><p class="xdi">«'+esc(t.que_decir)+'»</p></div></div>').join(""));
+  h+=D("Cerrar pedidos sin presión",ul(BP.pedidos));
+  h+=D("Después de la fiesta",msgs(BP.seguimiento));
+  if(BP.anfitriona)h+=D("Si la fiesta es en casa de otra persona",ul(BP.anfitriona));
+  return h;
+}
+
+// ---------- Reto 21 días (interno) ----------
+function viewReto(){
+  const R=NI.reto||{},M=R.mensajes||{};
+  let h=H("Reto 21 días",R.intro||"","Solo para el equipo");
+  h+='<section class="aviso eqaviso"><b>Los menús del reto no se envían ni se enseñan. Los da la nutricionista dentro del reto.</b></section>';
+  h+=P("Para quién es",ul(R.para_quien))+P("Qué incluye",ul(R.incluye))+P("Cómo se entra",ol(R.como_entrar));
+  if(R.calendario&&R.calendario.length)h+=P("Cómo va el reto",ul(R.calendario));
+  if(R.proximo)h+=P("Próximo reto",'<p>'+esc(R.proximo)+'</p>');
+  h+=D("Preguntas que te harán",'<dl class="gl">'+(R.faq||[]).map(f=>'<dt>'+esc(f.q)+'</dt><dd>'+esc(f.a)+'</dd>').join("")+'</dl>');
+  h+=[["informar","Para informar"],["inscripcion","Para inscribir"],["bienvenida","Bienvenida al grupo"],["seguimiento","Seguimiento"],["cierre","Al terminar"]].map(k=>D("Mensajes · "+k[1],msgs(M[k[0]]))).join("");
+  h+=P("Lo que nunca decimos del reto",ul(R.nunca),"xnop");
+  h+='<div class="acts"><button type="button" class="btn" data-c2k="go" data-c2v="st|clientas|reto">Crear contenido para invitar al reto</button></div>';
+  return h;
+}
+// ---------- Embarazo (interno) ----------
+function viewEmb(){
+  const E=NI.embarazo||{};
+  let h=H("Complementos y embarazo",E.intro||"","Solo para el equipo");
+  h+='<section class="aviso eqaviso"><b>'+esc(E.aviso||"")+'</b></section>';
+  h+=(E.etapas||[]).map(e=>P(e.t,'<p>'+esc(e.d)+'</p>'+(e.productos||[]).map(p=>'<div class="xmsg"><p><b>'+esc(prodN(p.id))+'</b> · '+esc(p.nota)+'</p></div>').join(""))).join("");
+  h+=D("Preguntas frecuentes",'<dl class="gl">'+(E.preguntas||[]).map(f=>'<dt>'+esc(f.q)+'</dt><dd>'+esc(f.a)+'</dd>').join("")+'</dl>');
+  h+=P("Lo que nunca decimos",ul(E.nunca),"xnop");
+  return h;
+}
+
+// ---------- Ganchos (sin huecos: todos escritos para su situación) ----------
+const TIPOS=[["negativo","Negativo","Avisa de un error o de algo que sale mal. Funciona porque nadie quiere equivocarse."],["contra corriente","Contra corriente","Dice algo que parece al revés de lo normal y luego lo explica."],["curiosidad","Curiosidad","Deja una pregunta en el aire que solo se resuelve si siguen mirando."],["fórmula","Fórmula","Promete enseñar cómo hacer algo concreto."],["historia","Historia","Empieza por algo que te pasó, con un detalle real."],["enemigo común","Enemigo común","Señala algo que nos fastidia a todas."],["pregunta","Pregunta","Una pregunta en la que la persona se reconoce."],["regla del tres","Regla del tres","Tres cosas, tres pasos o tres errores: se entiende de un vistazo."],["reto","Reto","Invita a probar algo unos días, sin prometer resultados."],["cotilla","Cotilla","Enseña algo tuyo que da curiosidad ver."],["sorpresa","Sorpresa","Un dato o un momento que no se espera."],["robado","Robado","Una frase real que te dijo alguien."]];
+const ALLG=[];(DB.paquetes||[]).forEach(s=>(s.pk&&s.pk.ganchos||[]).forEach(g=>ALLG.push({t:g.t,tipo:g.tipo,s})));
+function gBusca(q,via,tipo){
+  const ws=norm(q||"").trim().split(/\s+/).filter(w=>w.length>1);
+  let L=(DB.paquetes||[]).filter(s=>(!via||s.via===via));
+  if(ws.length)L=L.map(s=>{const hay=norm([s.nombre,s.escena,s.grupo,s.recurso,s.kw.join(" "),s.pk.ganchos.map(g=>g.t).join(" ")].join(" "));const n=ws.filter(w=>hay.indexOf(w)>=0).length;const tit=ws.filter(w=>norm(s.nombre).indexOf(w)>=0).length;return {s,sc:n*2+tit}}).filter(x=>x.sc>=ws.length*2).sort((a,b)=>b.sc-a.sc).map(x=>x.s);
+  return L;
+}
+function gCard(s,tipo){
+  const G=s.pk.ganchos.filter(g=>!tipo||g.tipo===tipo);
+  return '<section class="panel xg"><h4>'+esc(s.nombre)+' <small class="mut">· '+(s.via==="proyecto"?"Proyecto":"Clientas")+' · '+esc(s.grupo)+'</small></h4><ul class="hooks">'+G.map(g=>'<li><span class="tag">'+esc(cap(g.tipo))+'</span> '+esc(g.t)+' <button type="button" class="mini" data-copy="'+esc(g.t)+'">Copiar</button></li>').join("")+'</ul><button type="button" class="mini" data-c2k="use" data-c2v="'+esc(s.id)+'">Crear con esta situación</button></section>';
+}
+function gResHtml(){
+  const q=S.xgq||"",via=S.xgv||"",tipo=S.xgt||"";
+  if(!norm(q).trim()){
+    // sin búsqueda: cada tipo explicado con dos ejemplos reales del banco (cambian cada día)
+    const day=hash(new Date().toDateString());
+    return TIPOS.map((t,ti)=>[t,ti]).filter(x=>!tipo||x[0][0]===tipo).map(([t,ti])=>{const L=ALLG.filter(g=>g.tipo===t[0]&&(!via||g.s.via===via));const ex=L.length?[L[(day+ti*131)%L.length],L[(day*7+ti*389+L.length/2|0)%L.length]]:[];
+      return '<section class="panel xg"><h3>'+esc(t[1])+'</h3><p class="mut">'+esc(t[2])+'</p><ul class="hooks">'+ex.map(g=>'<li>'+esc(g.t)+' <small class="mut">· '+esc(g.s.nombre)+'</small> <button type="button" class="mini" data-copy="'+esc(g.t)+'">Copiar</button></li>').join("")+'</ul></section>'}).join("");
+  }
+  const L=gBusca(q,via,tipo);
+  if(!L.length)return '<p class="mut center">No hay ninguna situación con esas palabras. Prueba con una sola palabra: noche, café, regalo, tiempo…</p>';
+  return '<p class="mut">'+L.length+(L.length===1?' situación':' situaciones')+(L.length>8?' · te enseño las 8 que más encajan':'')+'</p>'+L.slice(0,8).map(s=>gCard(s,tipo)).join("");
+}
+function viewGanchos2(){
+  const via=S.xgv||"",tipo=S.xgt||"";
+  return '<section class="panel"><h2>Ganchos</h2><p class="lead">El gancho es la primera frase: decide si siguen mirando o pasan. Aquí tienes '+ALLG.length+' ganchos escritos uno a uno para su situación, nada de frases con huecos. Escribe de qué vas a hablar y te enseño los que encajan.</p>'
+  +'<label>¿De qué vas a hablar?<input id="xg_q" type="search" value="'+esc(S.xgq||"")+'" placeholder="Por ejemplo: noche, café, regalo, vergüenza" autocomplete="off"></label>'
+  +'<div class="chips">'+[["","Todo"],["clientas","Clientas"],["proyecto","Proyecto"]].map(v=>'<button type="button" class="chip'+(via===v[0]?" on":"")+'" data-xk="gv" data-xv="'+v[0]+'">'+v[1]+'</button>').join("")+'</div>'
+  +'<label>Tipo de gancho<select id="xg_t"><option value="">Los 12 tipos</option>'+TIPOS.map(t=>'<option value="'+esc(t[0])+'"'+(tipo===t[0]?" selected":"")+'>'+esc(t[1])+'</option>').join("")+'</select></label></section>'
+  +'<div id="xg_res">'+gResHtml()+'</div>';
+}
+
+// ---------- Recursos: «Me han escrito una palabra» ----------
+function kwBuscaHtml(q){
+  const n=norm(q||"").trim().toUpperCase();
+  if(n.length<2)return '';
+  const L=(DB.paquetes||[]).filter(s=>s.kw.some(k=>norm(k).toUpperCase().indexOf(n)===0)).sort((a,b)=>(norm(a.kw[0]).toUpperCase()===n?0:1)-(norm(b.kw[0]).toUpperCase()===n?0:1)).slice(0,6);
+  if(!L.length)return '<p class="mut">Ninguna situación usa esa palabra. Si la escribiste tú, busca abajo la guía por tema.</p>';
+  return L.map(s=>{const G=s.pk.guia;return '<details class="panel xd"'+(L.length===1?" open":"")+'><summary>'+esc(s.kw[0])+' · '+esc(s.nombre)+'<small class="mut"> · '+(s.via==="proyecto"?"Proyecto":"Clientas")+'</small></summary>'
+    +'<p class="mut">Le mandas: '+esc(s.pk.recurso_corto)+'</p><div class="xmsg"><p>'+esc(G.entrega)+'</p></div><pre class="c2pre">'+esc(G.texto)+'</pre>'
+    +'<button type="button" class="mini" data-copy="'+esc(G.entrega+"\n\n"+G.texto)+'">Copiar mensaje y guía</button>'
+    +'<h4 class="xh4">A los 2 o 3 días</h4>'+msgs([G.seguimiento])+'</details>'}).join("");
+}
+function kwBuscaPanel(){return '<section class="panel xkw"><h3>¿Te han escrito una palabra?</h3><p class="mut">Escríbela y te sale lo que tienes que mandar.</p><input id="xk_q" type="search" value="'+esc(S.xkq||"")+'" placeholder="Por ejemplo: NOCHE" autocomplete="off" autocapitalize="characters"><div id="xk_res">'+kwBuscaHtml(S.xkq||"")+'</div></section>'}
+
+// ---------- Mis números: 5·5·5 de hoy ----------
+const K555="fs_555";
+const hoyKey=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+function d555(){const h=ls(K555);return h&&typeof h==="object"&&!Array.isArray(h)?h:{}}
+function panel555(){
+  const I=((PRO.diario||{}).items)||[];if(!I.length)return "";
+  const H5=d555(),t=H5[hoyKey()]||{};
+  const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const x=H5[k]||{};const ok=I.every(it=>(x[it.k]||0)>=5);days.push('<span class="x5d'+(ok?" ok":"")+'" title="'+esc(k)+'">'+["D","L","M","X","J","V","S"][d.getDay()]+'</span>')}
+  return '<section class="panel"><h3>Mi 5·5·5 de hoy</h3><p class="mut">'+esc((PRO.diario||{}).intro||"")+'</p>'
+  +I.map(it=>{const n=Math.min(5,t[it.k]||0);return '<div class="x5"><div><b>'+esc(it.t)+'</b><small>'+esc(it.d)+'</small></div><div class="x5c"><button type="button" class="mini" data-xk="555" data-xv="'+esc(it.k)+'|-1" aria-label="Quitar uno">−</button><span>'+n+' / 5</span><button type="button" class="mini" data-xk="555" data-xv="'+esc(it.k)+'|1" aria-label="Sumar uno">+</button></div></div>'}).join("")
+  +'<p class="x5w">Últimos 7 días: '+days.join("")+'</p><p class="note">Se guarda solo en este móvil. Un día cuenta como hecho cuando llegas a 5 en las tres.</p>'
+  +'<div class="acts"><button type="button" class="btn ghost" data-tab="eq_prospectar">Ver la guía de prospección</button></div></section>';
+}
+
+// ---------- montaje en las vistas existentes ----------
+const _equipo=VIEWS.equipo,_paises=VIEWS.eq_paises,_numeros=viewNumeros,_recursos=viewRecursos;
+const XCARDS=[["eq_prospectar","Prospectar","Lista F.R.A.N.C., AIDA, mensajes y tu 5·5·5"],["eq_beauty","Mi Beauty Party","Organizador paso a paso, guion y pedidos"],["eq_reto","Reto 21 días","Cómo funciona, cómo se entra y mensajes"],["eq_embarazo","Complementos y embarazo","Orientación interna, siempre con su médico"],["tt_live","TikTok LIVE","Guion, preparación y normas para no tener problemas"]];
+VIEWS.equipo=function(){
+  const h=_equipo();
+  const extra='<h3 class="xeqh">Más herramientas del equipo</h3><div class="eqcards">'+XCARDS.map(c=>'<button type="button" class="eqc plain" data-tab="'+c[0]+'"><span class="eqcs"><b>'+esc(c[1])+'</b><small>'+esc(c[2])+'</small></span></button>').join("")+'</div>';
+  return h+extra;
+};
+VIEWS.eq_paises=function(){
+  const C=(eqSec("paises").casillero)||null;let h=_paises();
+  if(C)h+='<section class="panel"><h3>'+esc(C.titulo)+'</h3><p>'+esc(C.que)+'</p><p><b>'+esc(C.quien)+'</b></p>'
+   +C.lista.map(x=>'<div class="eqpais"><h4>'+esc(x.p)+' · '+esc(x.n)+'</h4>'+(x.link?eqLinks([x.link]):'')+(x.nota?'<p class="mut">'+esc(x.nota)+'</p>':'')+'</div>').join("")
+   +'<p class="note">'+esc(C.aviso)+'</p></section>';
+  return h;
+};
+const numeros=function(){return panel555()+_numeros()};
+const recursos=function(){return kwBuscaPanel()+_recursos()};
+Object.assign(VIEWS,{numeros,recursos});
+Object.assign(VIEWS,{tt_live:viewLive,eq_prospectar:viewPros,eq_beauty:viewBeauty,eq_reto:viewReto,eq_embarazo:viewEmb,ganchos:viewGanchos2});
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("button[data-xk]");if(!b)return;
+  const k=b.dataset.xk,v=b.dataset.xv||"";
+  if(k==="live"){S.xlive=v;render(true)}
+  else if(k==="gv"){S.xgv=v;render(true)}
+  else if(k==="bp"){const d=ls("fs_bp_chk")||{};if(d[v])delete d[v];else d[v]=1;ls("fs_bp_chk",d);const on=!!d[v];b.classList.toggle("on",on);b.setAttribute("aria-pressed",on?"true":"false")}
+  else if(k==="555"){const p=v.split("|"),H5=d555(),hk=hoyKey(),t=H5[hk]||{};t[p[0]]=Math.max(0,Math.min(5,(t[p[0]]||0)+(+p[1]||0)));H5[hk]=t;
+    const keys=Object.keys(H5).sort();while(keys.length>60)delete H5[keys.shift()];ls(K555,H5);render(true)}
+});
+document.addEventListener("input",e=>{
+  const el=e.target;if(!el)return;
+  if(el.id==="xg_q"){S.xgq=el.value.slice(0,60);const r=document.getElementById("xg_res");if(r)r.innerHTML=gResHtml()}
+  else if(el.id==="xk_q"){S.xkq=el.value.slice(0,20);const r=document.getElementById("xk_res");if(r)r.innerHTML=kwBuscaHtml(S.xkq)}
+});
+document.addEventListener("change",e=>{if(e.target&&e.target.id==="xg_t"){S.xgt=e.target.value;const r=document.getElementById("xg_res");if(r)r.innerHTML=gResHtml()}});
+return {gBusca,kwBuscaHtml,numeros,recursos};
+})();
+
+// ===== Fam Studio · MI SEMANA (planificador editable y guardado en el móvil) =====
+// Cada pieza guarda exactamente cómo se creó (tipo, vía, objetivo, situación, nº de stories, palabra, gancho…)
+// para que «Abrir guion» enseñe lo mismo que se eligió en Crear. Se guarda en localStorage (este móvil).
+const PL=(function(){
+const KEY="fs_plan_v1",MAXW=16;
+const DIAS=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"],DC=["L","M","X","J","V","S","D"];
+const MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const TIPO={st:"Stories",re:"Reel",tt:"TikTok"};
+const SLOT={m:"Mañana",md:"De 11:00 a 14:00",t:"Tarde"};
+const slotDef=t=>t==="st"?"md":"m";
+const pad=n=>String(n).padStart(2,"0");
+const kd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+function lunes(d){d=new Date(d.getFullYear(),d.getMonth(),d.getDate());const w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);return d}
+const wkHoy=()=>kd(lunes(new Date()));
+const fecha=(wk,i)=>{const p=wk.split("-").map(Number),d=new Date(p[0],p[1]-1,p[2]+i);return d};
+const fTxt=d=>d.getDate()+" "+MESES[d.getMonth()];
+const hoyIdx=wk=>wk===wkHoy()?(new Date().getDay()+6)%7:-1;
+// ---------- almacenamiento ----------
+function load(){const x=ls(KEY);return x&&typeof x==="object"&&x.w&&typeof x.w==="object"?x:{w:{},cfg:null}}
+function save(D){const ks=Object.keys(D.w).sort();while(ks.length>MAXW)delete D.w[ks.shift()];ls(KEY,D)}
+const valido=it=>it&&C2.PK[it.s]&&TIPO[it.t]&&it.d>=0&&it.d<=6;
+function items(wk){const D=load();return (D.w[wk]||[]).filter(valido)}
+function setItems(wk,L){const D=load();D.w[wk]=L;save(D)}
+const nid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function snap(c){return {t:c.t,v:c.v,o:c.o,s:c.s,n:c.n,kw:c.kw,own:!!c.own,hook:c.hook,ci:c.ci,ri:c.ri,ti:c.ti}}
+// ---------- estado de pantalla ----------
+const E=()=>S.pl||(S.pl={wk:wkHoy(),wiz:false,del:"",cfg:null});
+// ---------- generador «Crear mi semana rápida» ----------
+function cfgDef(){
+  const D=load();
+  return D.cfg||{re:2,reP:1,st:4,stP:2,tt:0,tema:"uno",sc:"",sp:"",desc:"sab",modo:"nuevo"};
+}
+const TEMAS=v=>C2.PKS.filter(s=>s.via===v&&(C2.cuando(s)==="todo"||C2.cuando(s)==="temp"));
+// tema por defecto: una situación que sirva para varios objetivos (que te escriban, que confíen y que te conozcan)
+function temaDef(v){const L=TEMAS(v),R=L.filter(s=>["escriban","confien","conocer"].every(o=>s.objetivos.indexOf(o)>=0));const P=R.length?R:L;return (C2.sugerida(P,{v,o:"semana"})||P[0]||{}).id||""}
+function reparte(n,dias,off){const out=[];if(!n||!dias.length)return out;for(let i=0;i<n;i++)out.push(dias[Math.floor((i+(off||0))*dias.length/n)%dias.length]);return out}
+const OBJ_ST=["escriban","confien","conocer","escriban","duda","confien","conocer","producto"];
+const OBJ_RE=["conocer","escriban","conocer","escriban","conocer"];
+const OBJ_ALT=["escriban","confien","conocer","duda","producto","invitar","reto","taller"];
+// primero el objetivo; luego la situación que lo admite (en «un tema», la del tema si puede)
+function pieza(v,cfg,lista,i){
+  const o=lista[i%lista.length];
+  if(cfg.tema==="uno"){const s=C2.PK[v==="proyecto"?cfg.sp:cfg.sc];if(s)return {s,o:s.objetivos.indexOf(o)>=0?o:(OBJ_ALT.find(x=>s.objetivos.indexOf(x)>=0)||s.objetivos[0])}}
+  const L=TEMAS(v).filter(s=>s.objetivos.indexOf(o)>=0);const A=L.length?L:TEMAS(v);if(!A.length)return null;
+  const s=A[(hash(wkHoy()+v+o)+i*17)%A.length];return {s,o:s.objetivos.indexOf(o)>=0?o:s.objetivos[0]};
+}
+function generar(cfg){
+  const dias=[0,1,2,3,4,5,6].filter(d=>!(cfg.desc==="sab"&&d===5)&&!(cfg.desc==="dom"&&d===6)&&!(cfg.desc==="finde"&&d>=5));
+  const out=[];let k=0;
+  const add=(t,v,d,o,s,sl,i)=>{const n=t==="st"?defLen(S.f&&S.f.nivel):3;out.push({id:nid(),d,sl,t,v,o,s:s.id,n,kw:s.kw[0],own:false,hook:(i*5+k)%12,ci:i%3,ri:i%3,ti:i%5,done:false});k++};
+  // reels: proyecto primero, repartidos por la mañana
+  const rd=reparte(cfg.re,dias,0);
+  rd.forEach((d,i)=>{const v=i<cfg.reP?"proyecto":"clientas",j=v==="proyecto"?i:i-cfg.reP,x=pieza(v,cfg,OBJ_RE,j);if(x)add("re",v,d,x.o,x.s,"m",j+3)});
+  // stories: alternando proyecto y clientas para que no se junten
+  const sd=reparte(cfg.st,dias,0.5);
+  let ip=0,ic=0;const nP=cfg.stP,nC=cfg.st-cfg.stP;
+  sd.forEach((d,i)=>{const v=(ip<nP&&(ic>=nC||i%2===0))?"proyecto":"clientas";const j=v==="proyecto"?ip++:ic++;const x=pieza(v,cfg,OBJ_ST,j);if(x)add("st",v,d,x.o,x.s,"md",j)});
+  // TikTok: cada día disponible, mañana y tarde (70 % proyecto)
+  if(cfg.tt>0)dias.forEach((d,i)=>{for(let x=0;x<cfg.tt;x++){const v=(i*cfg.tt+x)%10<7?"proyecto":"clientas";const q=pieza(v,cfg,["escriban","conocer"],i+x);if(q)add("tt",v,d,q.o,q.s,x===0?"m":"t",i+x+7)}});
+  return out;
+}
+// ---------- vista ----------
+function itemHtml(it,wk,del){
+  const s=C2.PK[it.s],vc=it.v==="proyecto"?"p":"c";
+  const kw=C2.tipoCierre(it.o)==="kw"?'<span class="plkw">'+esc(it.kw||s.kw[0])+'</span>':'';
+  const mv='<select class="plmv" data-pmove="'+esc(it.id)+'" aria-label="Mover a otro día">'+DIAS.map((x,i)=>'<option value="'+i+'"'+(i===it.d?" selected":"")+'>'+(i===it.d?"Mover…":x)+'</option>').join("")+'</select>';
+  return '<article class="plit '+vc+(it.done?" done":"")+'"><button type="button" class="plck" data-pk="done" data-pi="'+esc(it.id)+'" aria-pressed="'+(!!it.done)+'" aria-label="Marcar como hecha"><span></span></button>'
+  +'<div class="plb"><div class="plt"><span class="pltipo">'+TIPO[it.t]+(it.t==="st"?" · "+it.n:"")+'</span><span class="plvia">'+(it.v==="proyecto"?"Proyecto":"Clientas")+'</span><span class="plsl">'+esc(SLOT[it.sl]||"")+'</span></div>'
+  +'<b class="pln">'+esc(s.nombre)+'</b><small class="plo">'+esc(C2.objLabel(it.v,it.o))+'</small>'+kw
+  +'<div class="placts"><button type="button" class="mini plopen" data-pk="open" data-pi="'+esc(it.id)+'">Editar en Crear</button>'+mv
+  +(del===it.id?'<button type="button" class="mini plno" data-pk="delok" data-pi="'+esc(it.id)+'">¿Seguro? Quitar</button>':'<button type="button" class="mini" data-pk="del" data-pi="'+esc(it.id)+'" aria-label="Quitar">Quitar</button>')+'</div></div></article>'+'<details class="plgd" open><summary>Ver el guion</summary><div class="c2 plguion">'+C2.guionRO(it)+'</div></details>';
+}
+function stepper(f,lab,val,max,help){return '<div class="plstep"><div><b>'+lab+'</b>'+(help?'<small>'+help+'</small>':'')+'</div><div class="plsc"><button type="button" class="mini" data-pk="cfg" data-pf="'+f+'" data-pdlt="-1" aria-label="Menos">−</button><span>'+val+'</span><button type="button" class="mini" data-pk="cfg" data-pf="'+f+'" data-pdlt="1" aria-label="Más"'+(val>=max?" disabled":"")+'>+</button></div></div>'}
+function chipsOpt(f,cur,ops){return '<div class="chips">'+ops.map(o=>'<button type="button" class="chip'+(cur===o[0]?" on":"")+'" data-pk="opt" data-pf="'+f+'" data-pv="'+o[0]+'">'+o[1]+'</button>').join("")+'</div>'}
+function temaSel(id,v,cur){const L=TEMAS(v);return '<select id="'+id+'">'+[...new Set(L.map(x=>x.grupo))].map(g=>'<optgroup label="'+esc(g)+'">'+L.filter(x=>x.grupo===g).map(x=>'<option value="'+esc(x.id)+'"'+(x.id===cur?" selected":"")+'>'+esc(x.nombre)+'</option>').join("")+'</optgroup>').join("")+'</select>'}
+function wizHtml(){
+  const e=E(),c=e.cfg||(e.cfg=cfgDef());
+  if(!C2.PK[c.sc])c.sc=temaDef("clientas");if(!C2.PK[c.sp])c.sp=temaDef("proyecto");
+  c.reP=Math.min(c.reP,c.re);c.stP=Math.min(c.stP,c.st);
+  return '<section class="panel plwiz"><h3>Crear mi semana rápida</h3><p class="mut">Elige cuánto quieres publicar y para quién. Después puedes cambiar, mover o quitar cada cosa.</p>'
+  +stepper("re","Reels",c.re,7,"Se publican por la mañana")+(c.re?stepper("reP","De ellos, para el proyecto",c.reP,c.re,(c.re-c.reP)+" para clientas"):"")
+  +stepper("st","Secuencias de stories",c.st,14,"De 11:00 a 14:00")+(c.st?stepper("stP","De ellas, para el proyecto",c.stP,c.st,(c.st-c.stP)+" para clientas"):"")
+  +stepper("tt","Vídeos de TikTok al día",c.tt,2,c.tt?"Mañana"+(c.tt>1?" y tarde":"")+", cada día que publicas":"Si no usas TikTok, déjalo en 0")
+  +'<div class="plgrp">Tema</div>'+chipsOpt("tema",c.tema,[["uno","Un tema toda la semana"],["variado","Un tema distinto cada vez"]])
+  +(c.tema==="uno"?'<label class="c2lbl">Tema para clientas'+temaSel("pl_sc","clientas",c.sc)+'</label><label class="c2lbl">Tema para el proyecto'+temaSel("pl_sp","proyecto",c.sp)+'</label>':'<p class="mut">Cada pieza sale con una situación distinta de esta temporada.</p>')
+  +'<div class="plgrp">Día de descanso</div>'+chipsOpt("desc",c.desc,[["sab","Sábado"],["dom","Domingo"],["finde","Fin de semana"],["no","Ninguno"]])
+  +(items(e.wk).length?'<div class="plgrp">Lo que ya tienes esta semana</div>'+chipsOpt("modo",c.modo,[["nuevo","Empezar de cero"],["sumar","Añadir a lo que hay"]]):'')
+  +'<div class="acts"><button type="button" class="btn" data-pk="gen">Preparar mi semana</button><button type="button" class="btn ghost" data-pk="wiz">Cancelar</button></div></section>';
+}
+function textoSemana(wk){
+  const L=items(wk);let o="MI SEMANA · del "+fTxt(fecha(wk,0))+" al "+fTxt(fecha(wk,6))+"\n";
+  DIAS.forEach((d,i)=>{const X=L.filter(x=>x.d===i);o+="\n"+d.toUpperCase()+" "+fTxt(fecha(wk,i))+"\n"+(X.length?X.map(x=>"- "+(SLOT[x.sl]||"")+" · "+TIPO[x.t]+(x.t==="st"?" ("+x.n+")":"")+" · "+(x.v==="proyecto"?"Proyecto":"Clientas")+" · "+C2.PK[x.s].nombre+(C2.tipoCierre(x.o)==="kw"?" · palabra "+(x.kw||C2.PK[x.s].kw[0]):"")).join("\n"):"- Descanso")+"\n"});
+  return o;
+}
+function viewPlan(){
+  const e=E(),wk=e.wk,L=items(wk),hi=hoyIdx(wk),hechas=L.filter(x=>x.done).length;
+  const ord=(a,b)=>["m","md","t"].indexOf(a.sl)-["m","md","t"].indexOf(b.sl);
+  let h='<section class="panel plhead"><h2>Mi semana</h2><div class="plnav"><button type="button" class="mini" data-pk="wk" data-pdlt="-7" aria-label="Semana anterior">‹</button><div><b>'+(wk===wkHoy()?"Esta semana":wk===kd(fecha(wkHoy(),7))?"La semana que viene":"Semana")+'</b><small>del '+fTxt(fecha(wk,0))+' al '+fTxt(fecha(wk,6))+'</small></div><button type="button" class="mini" data-pk="wk" data-pdlt="7" aria-label="Semana siguiente">›</button></div>'
+  +(L.length?'<div class="plprog"><div style="width:'+Math.round(hechas*100/L.length)+'%"></div></div><p class="mut center">'+hechas+' de '+L.length+' publicaciones hechas</p>':'')
+  +'<div class="plstrip">'+DIAS.map((d,i)=>{const n=L.filter(x=>x.d===i).length;return '<button type="button" class="pld'+(i===hi?" hoy":"")+(n?" con":"")+'" data-pk="ir" data-pv="'+i+'"><small>'+DC[i]+'</small><b>'+fecha(wk,i).getDate()+'</b><i>'+(n?n:"·")+'</i></button>'}).join("")+'</div>'
+  +'<div class="plleg"><span class="c">Clientas</span><span class="p">Proyecto</span></div>'
+  +'<div class="acts"><button type="button" class="btn" data-pk="wiz">'+(L.length?"Rehacer o ampliar mi semana":"Crear mi semana rápida")+'</button>'+(L.length?'<button type="button" class="btn ghost" data-copy="'+esc(textoSemana(wk))+'">Copiar mi semana</button>':'')+'</div></section>';
+  if(e.wiz)h+=wizHtml();
+  if(!L.length&&!e.wiz)h+='<section class="panel plvacio"><h3>Así funciona</h3><ol class="xol"><li><b>Crea tu semana rápida:</b> eliges cuántos reels, stories y TikTok, y para quién. La app te lo reparte por días.</li><li><b>O añade lo que te guste desde Crear:</b> al final de cada guion tienes «Añadir a mi semana» y eliges el día.</li><li><b>Cada día abre su guion,</b> lo publicas y lo marcas como hecho.</li></ol><p class="note">Se guarda en este móvil: la próxima vez que entres, tu semana sigue aquí.</p></section>';
+  const op=e.open||(e.open={});
+  h+=DIAS.map((d,i)=>{const X=L.filter(x=>x.d===i).sort(ord);const abierto=(e.wk+"|"+i) in op?op[e.wk+"|"+i]:(i===hi||(hi<0&&i===0));
+    const res=X.length?X.map(x=>'<span class="plmini '+(x.v==="proyecto"?"p":"c")+(x.done?" ok":"")+'">'+TIPO[x.t]+'</span>').join(""):'<span class="plmini off">Descanso</span>';
+    return '<details class="panel plday'+(i===hi?" hoy":"")+'" id="pld'+i+'" data-pday="'+e.wk+'|'+i+'"'+(abierto?" open":"")+'><summary class="pldh"><div><b>'+d+'</b> <small>'+fTxt(fecha(e.wk,i))+(i===hi?' · hoy':'')+'</small><div class="plres">'+res+'</div></div><span class="plab">'+(X.length?X.length+(X.length===1?" publicación":" publicaciones"):"")+'</span></summary>'
+    +'<div class="pldbody"><div class="pldadd"><button type="button" class="mini" data-pk="add" data-pv="'+i+'">+ Añadir a este día</button></div>'
+    +(X.length?X.map(x=>itemHtml(x,wk,e.del)).join(""):'<p class="mut pldesc">Sin nada. Descansa o toca «+ Añadir a este día».</p>')+'</div></details>'}).join("");
+  h+='<p class="note">Reels por la mañana, stories de 11:00 a 14:00 y como mucho dos días con palabra clave en stories. Tu semana se guarda en este móvil.</p>';
+  return h;
+}
+// ---------- en Crear ----------
+function destino(c){
+  const T=c.target;if(!T)return "";
+  return '<div class="pldest">Vas a añadir al <b>'+DIAS[T.d]+' '+fTxt(fecha(T.wk,T.d))+'</b><button type="button" class="mini" data-pk="cancel">Cancelar</button></div>';
+}
+function resBox(c,s){
+  const e=E(),wk=(c.target&&c.target.wk)||e.wk,it=c.fromPlan?items(c.fromPlan.wk).find(x=>x.id===c.fromPlan.id):null;
+  if(it)return '<section class="plbox"><b>Esto está en tu semana: '+DIAS[it.d]+'</b><p class="mut">Si has cambiado algo (otro gancho, otra palabra, más stories), guárdalo.</p><div class="acts"><button type="button" class="btn" data-pk="upd">Guardar cambios en mi semana</button><button type="button" class="btn ghost" data-pk="back">Volver a mi semana</button></div></section>';
+  const d0=c.target?c.target.d:Math.max(0,hoyIdx(wk));
+  const wks=[wkHoy(),kd(fecha(wkHoy(),7))];
+  return '<section class="plbox"><b>¿Te gusta? Añádelo a tu semana</b><div class="plrow"><label>Semana<select id="pl_wk">'+wks.map((w,i)=>'<option value="'+w+'"'+(w===wk?" selected":"")+'>'+(i?"La que viene":"Esta semana")+'</option>').join("")+'</select></label>'
+  +'<label>Día<select id="pl_d">'+DIAS.map((x,i)=>'<option value="'+i+'"'+(i===d0?" selected":"")+'>'+x+'</option>').join("")+'</select></label>'
+  +'<label>Momento<select id="pl_sl">'+Object.keys(SLOT).map(k=>'<option value="'+k+'"'+(k===slotDef(c.t)?" selected":"")+'>'+SLOT[k]+'</option>').join("")+'</select></label></div>'
+  +'<button type="button" class="btn" data-pk="addc">Añadir a mi semana</button></section>';
+}
+// ---------- eventos ----------
+document.addEventListener("click",ev=>{
+  const b=ev.target.closest&&ev.target.closest("button[data-pk]");if(!b)return;
+  const e=E(),k=b.dataset.pk,id=b.dataset.pi,c=C2.st();
+  const L=()=>load().w[e.wk]||[];
+  switch(k){
+   case "wk":{const d=fecha(e.wk,+b.dataset.pdlt||0);e.wk=kd(d);e.del="";render();break}
+   case "wiz":e.wiz=!e.wiz;e.cfg=e.cfg||cfgDef();render(true);break;
+   case "cfg":{const f=b.dataset.pf,cfg=e.cfg,max={re:7,st:14,tt:2,reP:cfg.re,stP:cfg.st}[f];cfg[f]=Math.max(0,Math.min(max,(cfg[f]||0)+(+b.dataset.pdlt||0)));render(true);break}
+   case "opt":e.cfg[b.dataset.pf]=b.dataset.pv;render(true);break;
+   case "gen":{const cfg=e.cfg,nuevos=generar(cfg),D=load();D.cfg=cfg;D.w[e.wk]=(cfg.modo==="sumar"?(D.w[e.wk]||[]):[]).concat(nuevos);save(D);e.wiz=false;render();toast(nuevos.length+" publicaciones en tu semana");break}
+   case "ir":{const x=document.getElementById("pld"+b.dataset.pv);if(x){x.open=true;(e.open||(e.open={}))[e.wk+"|"+b.dataset.pv]=true;x.scrollIntoView({behavior:"smooth",block:"start"})}break}
+   case "done":{const X=L(),it=X.find(x=>x.id===id);if(it){it.done=!it.done;setItems(e.wk,X);render(true)}break}
+   case "del":e.del=id;render(true);break;
+   case "delok":{setItems(e.wk,L().filter(x=>x.id!==id));e.del="";render(true);break}
+   case "open":{const it=L().find(x=>x.id===id);if(!it)break;S.c2=Object.assign({w:"todo",q:"",res:true},snap(it));S.c2.w=C2.cuando(C2.PK[it.s])||"todo";S.c2.fromPlan={wk:e.wk,id:it.id};S.c2.target=null;go("crear");break}
+   case "add":{const c0=C2.st();c0.target={wk:e.wk,d:+b.dataset.pv};c0.fromPlan=null;c0.res=false;go("crear");break}
+   case "cancel":c.target=null;render(true);break;
+   case "back":c.fromPlan=null;c.res=false;go("semana");break;
+   case "upd":{const f=c.fromPlan;if(!f)break;const D=load(),X=D.w[f.wk]||[],it=X.find(x=>x.id===f.id);if(it){Object.assign(it,snap(c));D.w[f.wk]=X;save(D);toast("Guardado en tu semana")}break}
+   case "addc":{const wk=($("#pl_wk")||{}).value||wkHoy(),d=+(($("#pl_d")||{}).value||0),sl=($("#pl_sl")||{}).value||slotDef(c.t);
+     const D=load(),X=D.w[wk]||[];X.push(Object.assign({id:nid(),d,sl,done:false},snap(c)));D.w[wk]=X;save(D);
+     c.target=null;toast("Añadido al "+DIAS[d].toLowerCase());e.wk=wk;b.textContent="Añadido al "+DIAS[d].toLowerCase();b.disabled=true;break}
+  }
+});
+document.addEventListener("change",ev=>{
+  const t=ev.target;if(!t)return;
+  if(t.dataset&&t.dataset.pmove){const e=E(),X=load().w[e.wk]||[],it=X.find(x=>x.id===t.dataset.pmove);if(it){it.d=+t.value;setItems(e.wk,X);render(true);toast("Movido al "+DIAS[it.d].toLowerCase())}}
+  else if(t.id==="pl_sc"||t.id==="pl_sp"){const e=E();e.cfg[t.id==="pl_sc"?"sc":"sp"]=t.value}
+});
+document.addEventListener("toggle",ev=>{const t=ev.target;if(t&&t.dataset&&t.dataset.pday){const e=E();(e.open||(e.open={}))[t.dataset.pday]=t.open}},true);
+VIEWS.semana=viewPlan;
+return {resBox,destino,items,generar,textoSemana,wkHoy};
+})();
+
 // ===== Fam Studio · navegación, inicio, instalación y administración =====
 const NAV=[["home","Inicio"],["crear","Crear"],["semana","Semana"],["recursos","Recursos"],["equipo","Equipo"],["mas","Más"]];
-const PARENT={situaciones:"mas",ganchos:"mas",formatos:"mas",cuadricula:"mas",revisor:"mas",guia:"mas",ayuda:"mas",perfil:"mas",instalar:"mas",admin:"mas",negocio:"mas",perfil_ig:"mas",numeros:"mas",guia_det:"recursos",pronto:"home",tt_idea:"home",tt_stories:"home",tt_plantillas:"home",tt_banco:"home",tt_historia:"home",tt_respuestas:"home",tt_bio:"home",tt_semana:"home",normas:"mas",eq_semana:"equipo",eq_calendario:"equipo",eq_formaciones:"equipo",eq_guias:"equipo",eq_herramientas:"equipo",eq_paises:"equipo",eq_terminos:"equipo",eq_presentar:"equipo",eq_ventas:"equipo",eq_normas:"equipo"};
+const PARENT={situaciones:"mas",ganchos:"mas",formatos:"mas",cuadricula:"mas",revisor:"mas",guia:"mas",ayuda:"mas",perfil:"mas",instalar:"mas",admin:"mas",negocio:"mas",perfil_ig:"mas",numeros:"mas",guia_det:"recursos",pronto:"home",tt_idea:"home",tt_stories:"home",tt_plantillas:"home",tt_banco:"home",tt_historia:"home",tt_respuestas:"home",tt_bio:"home",tt_semana:"home",normas:"mas",tt_live:"home",eq_prospectar:"equipo",eq_beauty:"equipo",eq_reto:"equipo",eq_embarazo:"equipo",eq_semana:"equipo",eq_calendario:"equipo",eq_formaciones:"equipo",eq_guias:"equipo",eq_herramientas:"equipo",eq_paises:"equipo",eq_terminos:"equipo",eq_presentar:"equipo",eq_ventas:"equipo",eq_normas:"equipo"};
 const parentOf=t=>(t==="negocio"&&S.negFrom==="equipo")?"equipo":PARENT[t];
-const TITLES={situaciones:"Situaciones",ganchos:"Ganchos",formatos:"Formatos",cuadricula:"Cuadrícula",revisor:"Revisor",guia:"Guía del método",ayuda:"Cómo se usa",perfil:"Mi cuenta",instalar:"Instalar en el móvil",admin:"Administración",negocio:"Mi negocio",perfil_ig:"Mi perfil de Instagram",numeros:"Mis números",guia_det:"Recurso",pronto:"Próximamente",tt_idea:"Idea del día",tt_stories:"Stories para TikTok",tt_plantillas:"Plantillas",tt_banco:"Ideas escritas",tt_historia:"Mi historia en 60 segundos",tt_respuestas:"Responder comentarios",tt_bio:"Mi bio de TikTok",tt_semana:"Mi semana en TikTok",normas:"Lo que no se dice",equipo:"Equipo",eq_semana:"Mi primera semana",eq_calendario:"Calendario del equipo",eq_formaciones:"Formaciones",eq_guias:"Guías y plantillas",eq_herramientas:"Herramientas y canales",eq_paises:"Países y kits",eq_terminos:"Términos",eq_presentar:"Cómo presentar",eq_ventas:"Vender y recomendar",eq_normas:"Normas y organización"};
+const TITLES={situaciones:"Situaciones",ganchos:"Ganchos",formatos:"Formatos",cuadricula:"Cuadrícula",revisor:"Revisor",guia:"Guía del método",ayuda:"Cómo se usa",perfil:"Mi cuenta",instalar:"Instalar en el móvil",admin:"Administración",negocio:"Mi negocio",perfil_ig:"Mi perfil de Instagram",numeros:"Mis números",guia_det:"Recurso",pronto:"Próximamente",tt_idea:"Idea del día",tt_stories:"Stories para TikTok",tt_plantillas:"Plantillas",tt_banco:"Ideas escritas",tt_historia:"Mi historia en 60 segundos",tt_respuestas:"Responder comentarios",tt_bio:"Mi bio de TikTok",tt_semana:"Mi semana en TikTok",normas:"Lo que no se dice",tt_live:"TikTok LIVE",eq_prospectar:"Prospectar",eq_beauty:"Mi Beauty Party",eq_reto:"Reto 21 días",eq_embarazo:"Complementos y embarazo",equipo:"Equipo",eq_semana:"Mi primera semana",eq_calendario:"Calendario del equipo",eq_formaciones:"Formaciones",eq_guias:"Guías y plantillas",eq_herramientas:"Herramientas y canales",eq_paises:"Países y kits",eq_terminos:"Términos",eq_presentar:"Cómo presentar",eq_ventas:"Vender y recomendar",eq_normas:"Normas y organización"};
 const isStandalone=()=>{try{return window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}};
 const platform=()=>{const u=navigator.userAgent||"";if(/iPhone|iPad|iPod/i.test(u)||(/Macintosh/.test(u)&&"ontouchend" in document))return "ios";if(/Android/i.test(u))return "android";return "otro"};
 
@@ -2541,18 +3196,18 @@ function viewHome(){
   if(redGet()==="tiktok")return redSeg()+viewHomeTT(nombre)+instHtml();
   let h=redSeg()+'<section class="hero2"><p class="hi">'+(nombre?"Hola, "+esc(nombre):"Hola")+'</p><h2>¿Qué quieres hoy?</h2></section>';
   h+=instHtml();
-  h+='<section class="panel hblk"><h3>Conseguir clientas</h3>'+B("Stories que venden","Una secuencia con palabra clave para que te escriban",'data-act="pre" data-p="clientas"',true)+B("Reel para que te descubran","Gente nueva que todavía no te conoce",'data-act="reel" data-p="clientas|crecer"')+B("Reel para captar","Con palabra clave y recurso",'data-act="reel" data-p="clientas|captar"')+B("Recursos para enviar","Guías, tarjetas y mensajes",'data-tab="recursos"')+'</section>';
-  h+='<section class="panel hblk"><h3>Atraer gente al proyecto</h3>'+B("Stories del proyecto","Cuenta cómo lo encajas en tu día",'data-act="pre" data-p="proyecto"',true)+B("Reel del proyecto","Para que te encuentre quien busca algo propio",'data-act="reel" data-p="proyecto|crecer"')+'</section>';
-  h+='<section class="panel hblk"><h3>Organizarme</h3>'+B("Preparar mi semana","Un tema, varias secuencias, sin pensar cada día",'data-tab="semana"')+B("Ideas de qué contar","Situaciones reales del día a día",'data-tab="situaciones"')+'</section>';
+  h+='<section class="panel hblk"><h3>Conseguir clientas</h3>'+B("Stories que venden","Una secuencia con palabra clave para que te escriban",'data-c2k="go" data-c2v="st|clientas|escriban"',true)+B("Reel para que te descubran","Gente nueva que todavía no te conoce",'data-c2k="go" data-c2v="re|clientas|conocer"')+B("Reel para captar","Con palabra clave y lo que mandas",'data-c2k="go" data-c2v="re|clientas|escriban"')+B("Recursos para enviar","Guías, tarjetas y mensajes",'data-tab="recursos"')+'</section>';
+  h+='<section class="panel hblk"><h3>Atraer gente al proyecto</h3>'+B("Stories del proyecto","Cuenta cómo lo encajas en tu día",'data-c2k="go" data-c2v="st|proyecto|escriban"',true)+B("Reel del proyecto","Para que te encuentre quien busca algo propio",'data-c2k="go" data-c2v="re|proyecto|conocer"')+'</section>';
+  h+='<section class="panel hblk"><h3>Organizarme</h3>'+B("Mi semana","Tu calendario de publicaciones, guardado en tu móvil",'data-tab="semana"')+B("Ideas de qué contar",(DB.paquetes||[]).length+" situaciones reales del día a día",'data-tab="situaciones"')+'</section>';
   h+='<p class="note center"><button class="linkb" data-tab="ayuda">¿Primera vez? Mira cómo se usa</button></p>';
   return h;
 }
 function viewPronto(){return '<section class="panel"><h2>'+esc(S.pronto||"Próximamente")+'</h2><p class="lead">Esta parte de Fam Studio está en construcción y llega en la próxima actualización.</p><p>Mientras tanto, puedes preparar tus stories desde Crear.</p><div class="acts"><button class="btn" data-tab="crear">Ir a Crear</button></div></section>'}
 function viewMas(){
   const L=(id,t,s)=>'<button class="ml" data-tab="'+id+'"><b>'+t+'</b><small>'+s+'</small></button>';
-  return '<section class="panel"><h2>Más</h2><h4 class="mg">Herramientas</h4>'+L("situaciones","Situaciones","Ideas reales de qué contar")+L("ganchos","Ganchos","12 formas de empezar")+L("formatos","Formatos","Qué es cada tipo de story")+L("cuadricula","Cuadrícula","Dónde colocar texto y palabra clave")+L("revisor","Revisor","Revisa tus textos antes de publicar")+L("normas","Lo que no se dice","Qué evitar en Meta y TikTok, y cómo decirlo mejor")
+  return '<section class="panel"><h2>Más</h2><h4 class="mg">Herramientas</h4>'+L("situaciones","Situaciones","Todas las situaciones del banco")+L("ganchos","Ganchos","Miles de ganchos escritos, por tema")+L("formatos","Formatos","Qué es cada tipo de story")+L("cuadricula","Cuadrícula","Dónde colocar texto y palabra clave")+L("revisor","Revisor","Revisa tus textos antes de publicar")+L("normas","Lo que no se dice","Qué evitar en Meta y TikTok, y cómo decirlo mejor")
   +'<h4 class="mg">Aprende</h4>'+L("ayuda","Cómo se usa Fam Studio","Tutorial paso a paso")+L("guia","Guía del método","Stories, reels, CTA y plan semanal")
-  +'<h4 class="mg">Tu negocio</h4>'+L("negocio","Mi negocio","El plan de Farmasi explicado")+L("perfil_ig","Mi perfil de Instagram","Bio, destacadas y publicaciones fijadas")+L("numeros","Mis números","Cómo van tus stories y qué mejorar")
+  +'<h4 class="mg">Tu negocio</h4>'+L("negocio","Mi negocio","El plan de Farmasi explicado")+L("eq_prospectar","Prospectar","Lista F.R.A.N.C., AIDA y tu 5·5·5")+L("perfil_ig","Mi perfil de Instagram","Bio, destacadas y publicaciones fijadas")+L("numeros","Mis números","Cómo van tus stories y qué mejorar")
   +'<h4 class="mg">Tu cuenta</h4>'+L("perfil","Mi cuenta","Tu nombre, tu nivel y tus guiones guardados")+L("instalar","Instalar en el móvil","Tenerla como una app")+L("admin","Administración","Solo para la administradora del equipo")+'</section>';
 }
 
@@ -2612,5 +3267,5 @@ document.addEventListener("click",async e=>{
    case "dl":FS.download(d.f);break;
   }
 });
-Object.assign(VIEWS,{home:viewHome,recursos:viewRecursos,pronto:viewPronto,negocio:viewNegocio,perfil_ig:viewPerfilIG,numeros:viewNumeros,guia_det:viewGuiaDet,mas:viewMas,instalar:viewInstalar,admin:viewAdmin});
+Object.assign(VIEWS,{home:viewHome,recursos:XT.recursos,pronto:viewPronto,negocio:viewNegocio,perfil_ig:viewPerfilIG,numeros:XT.numeros,guia_det:viewGuiaDet,mas:viewMas,instalar:viewInstalar,admin:viewAdmin});
 render();
