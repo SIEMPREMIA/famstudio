@@ -2533,14 +2533,13 @@ const OBJ={
   ["duda","Resolver una duda o un miedo","«¿Y si no tengo tiempo?»"],
   ["invitar","Invitar a una formación","«El miércoles a las 20:00 hay presentación por Zoom»"]]};
 const TIPOS=[["st","Stories"],["re","Reel"],["tt","TikTok"]];
-const WHEN=[["todo","Todo el año"],["temp","Esta temporada"],["fechas","Fechas que vienen"]];
 const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
 const AVISO=(DB.gamas&&DB.gamas.nutri&&DB.gamas.nutri.aviso)||"";
 const LBL={gancho:"Engancha",antes:"Cómo era antes",ahora:"Cómo lo hago ahora",valor:"Un consejo",pregunta:"Encuesta",cierre:{kw:"Pide la palabra",sigue:"Invita a seguirte",encuesta:"Pregunta y escucha"}};
 const SETS={2:["gancho","cierre"],3:["gancho","ahora","cierre"],4:["gancho","antes","ahora","cierre"],5:["gancho","antes","ahora","v0","cierre"],6:["gancho","antes","ahora","v0","v1","cierre"],7:["gancho","antes","ahora","v0","v1","v2","cierre"],8:["gancho","antes","ahora","v0","v1","v2","pregunta","cierre"]};
 const PERSON='<svg class="c2p" viewBox="0 0 100 120" aria-hidden="true"><circle cx="50" cy="34" r="22" fill="#fff"/><path d="M8 120c3-30 20-46 42-46s39 16 42 46z" fill="#fff"/></svg>';
 
-const st=()=>S.c2||(S.c2={t:"st",v:"clientas",o:"escriban",w:"todo",q:"",s:"",n:defLen(S.f&&S.f.nivel),kw:"",own:false,hook:-1,ci:0,ri:0,ti:0,res:false});
+const st=()=>S.c2||(S.c2={t:"st",v:"clientas",o:"escriban",w:"hoy",g:"",q:"",s:"",n:defLen(S.f&&S.f.nivel),kw:"",own:false,hook:-1,ci:0,ri:0,ti:0,res:false});
 const tipoCierre=o=>o==="conocer"?"sigue":o==="confien"?"encuesta":"kw";
 const objsVia=v=>OBJ[v].filter(o=>PKS.some(s=>s.via===v&&s.objetivos.indexOf(o[0])>=0));
 const objLabel=(v,o)=>((OBJ[v].find(x=>x[0]===o)||[])[1])||"";
@@ -2555,10 +2554,48 @@ function cuando(s){
   return "";
 }
 const mesesTxt=s=>(s.meses||[]).length>=12?"":(s.meses||[]).map(m=>MES[m-1]).join(", ");
+// objetivos abiertos: cualquier situación sirve (todas traen palabra clave, «sígueme» y encuesta)
+const ABIERTOS=["conocer","escriban","confien"];
+const vale=(s,o)=>s.objetivos.indexOf(o)>=0||ABIERTOS.indexOf(o)>=0||(o==="producto"&&(s.productos||[]).length>0&&!!s.pk.producto_frase);
+const TEMA_N={hoy:"Para hoy",ahora:"Fechas que vienen",dia:"Mi día a día",piel:"Piel y cuerpo",maq:"Maquillaje",pelo:"Pelo",olor:"Perfumes y regalos",nutri:"Nutrición",casa:"En casa y talleres",dudas:"Dudas que me hacen"};
+const TEMA_ORD=["ahora","dia","piel","maq","pelo","olor","nutri","casa","dudas"];
+function temaDe(s){
+  const w=cuando(s);if(w==="temp"||w==="fechas")return "ahora";if(!w)return "";
+  const g=s.grupo;
+  if(/^Mi día · /.test(g))return "dia";
+  if(/^Por la (mañana|noche)$|^Mi piel|^Cuerpo/.test(g))return "piel";
+  if(/^Maquillaje/.test(g))return "maq";
+  if(g==="Pelo")return "pelo";
+  if(/^Olor/.test(g))return "olor";
+  if(/^(Nutrición|Reto)/.test(g))return "nutri";
+  if(/^(Beauty party|Taller)/.test(g))return "casa";
+  if(/^Dudas que/.test(g))return "dudas";
+  return "g:"+g;
+}
+const temaNom=t=>TEMA_N[t]||String(t).replace(/^g:/,"");
+const subNom=g=>g.replace(/^(Nutrición|Mi día) · /,"");
+const base=c=>PKS.filter(s=>s.via===c.v&&vale(s,c.o));
+const ordena=(L,o)=>L.filter(s=>s.objetivos.indexOf(o)>=0).concat(L.filter(s=>s.objetivos.indexOf(o)<0));
+const distMes=s=>{const m=mesNow();return Math.min(...(s.meses||[m]).map(x=>(x-m+12)%12))};
+function temas(c){
+  const n={};base(c).forEach(s=>{const t=temaDe(s);if(t)n[t]=(n[t]||0)+1});
+  return TEMA_ORD.filter(k=>n[k]).concat(Object.keys(n).filter(k=>TEMA_ORD.indexOf(k)<0)).map(k=>[k,n[k]]);
+}
+function paraHoy(c){
+  const B=base(c),out=[],k=dayKey()+"|"+c.v+"|"+c.o;
+  const A=B.filter(s=>temaDe(s)==="ahora").sort((a,b)=>distMes(a)-distMes(b));
+  if(A.length)out.push(A[hash(k+"a")%Math.min(A.length,6)]);
+  const T=[...new Set(B.map(temaDe).filter(t=>t&&t!=="ahora"))];
+  const r=T.length?hash(k)%T.length:0;
+  for(let i=0;i<T.length&&out.length<4;i++){const t=T[(r+i)%T.length],L=B.filter(s=>temaDe(s)===t),M=L.filter(s=>s.objetivos.indexOf(c.o)>=0),P=M.length?M:L;out.push(P[hash(k+t)%P.length])}
+  return out;
+}
 function lista(c,w,q){
-  const qq=norm(q||"").trim().split(/\s+/).filter(Boolean);
-  return PKS.filter(s=>s.via===c.v&&s.objetivos.indexOf(c.o)>=0&&(qq.length?true:cuando(s)===w)
-    &&(!qq.length||qq.every(x=>norm([s.nombre,s.escena,s.grupo,s.recurso].join(" ")).indexOf(x)>=0)));
+  const qq=norm(q||"").trim().split(/\s+/).filter(Boolean),B=base(c);
+  if(qq.length)return ordena(B.filter(s=>qq.every(x=>norm([s.nombre,s.escena,s.grupo,s.recurso,(s.kw||[]).join(" ")].join(" ")).indexOf(x)>=0)),c.o);
+  if(w==="hoy")return paraHoy(c);
+  const L=B.filter(s=>temaDe(s)===w);
+  return w==="ahora"?L.sort((a,b)=>distMes(a)-distMes(b)):L;
 }
 const dayKey=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
 const sugerida=(L,c)=>L.length?L[hash(dayKey()+"|"+c.v+"|"+c.o)%L.length]:null;
@@ -2566,9 +2603,9 @@ function asegurar(){
   const c=st();
   if(!VIAS[c.v])c.v="clientas";
   const O=objsVia(c.v);if(!O.some(o=>o[0]===c.o))c.o=(O.find(o=>o[0]==="escriban")||O[0])[0];
-  if(!lista(c,c.w,"").length){const w=WHEN.map(x=>x[0]).find(w=>lista(c,w,"").length);if(w)c.w=w}
+  if(!c.w||(c.w!=="hoy"&&!lista(c,c.w,"").length)){c.w="hoy";c.g=""}
   const s=PK[c.s];
-  if(!s||s.via!==c.v||s.objetivos.indexOf(c.o)<0){const L=lista(c,c.w,"");const g=sugerida(L,c)||PKS.find(x=>x.via===c.v&&x.objetivos.indexOf(c.o)>=0);c.s=g?g.id:"";c.kw="";c.own=false;c.hook=-1}
+  if(!s||s.via!==c.v||!vale(s,c.o)){let L=lista(c,c.w,"");if(c.g&&c.w!=="hoy"){const L2=L.filter(x=>x.grupo===c.g);if(L2.length)L=L2;else c.g=""}const g=(c.w==="hoy"?L[0]:sugerida(ordena(L,c.o).filter(x=>x.objetivos.indexOf(c.o)>=0),c)||sugerida(L,c))||PKS.find(x=>x.via===c.v&&vale(x,c.o));c.s=g?g.id:"";c.kw="";c.own=false;c.hook=-1}
   const S1=PK[c.s];
   if(S1&&!c.kw)c.kw=S1.kw[0];
   if(S1&&c.hook<0)c.hook=hash(dayKey()+S1.id)%S1.pk.ganchos.length;
@@ -2613,14 +2650,19 @@ function txtGuia(s){const G=s.pk.guia;return G.entrega+"\n\n"+G.texto}
 function viaCards(c){return '<div class="c2vias">'+Object.keys(VIAS).map(v=>'<button type="button" class="c2vc c2'+v[0]+(c.v===v?" on":"")+'" data-c2k="v" data-c2v="'+v+'" aria-pressed="'+(c.v===v)+'"><b>'+VIAS[v].n+'</b><small>'+VIAS[v].d+'</small></button>').join("")+'</div>'}
 const banner=c=>c.v==="proyecto"?'<div class="c2ban p">Creando para el proyecto <small>sumar gente al equipo</small></div>':'<div class="c2ban c">Creando para clientas <small>vender y recomendar</small></div>';
 const tipoTabs=c=>'<div class="c2tabs" role="group" aria-label="Qué vas a crear">'+TIPOS.map(t=>'<button type="button" class="'+(c.t===t[0]?"on":"")+'" data-c2k="t" data-c2v="'+t[0]+'" aria-pressed="'+(c.t===t[0])+'">'+t[1]+'</button>').join("")+'</div>';
-function sitBtn(s,c,sug){return '<button type="button" class="c2sit'+(s.id===c.s?" on":"")+'" data-c2k="s" data-c2v="'+esc(s.id)+'">'+esc(s.nombre)+(sug?'<span class="c2hoy">HOY</span>':'')+(mesesTxt(s)?'<span class="c2fecha">'+esc(mesesTxt(s))+'</span>':'')+'<small>'+esc(s.escena)+'</small></button>'}
+function sitBtn(s,c,tema){return '<button type="button" class="c2sit'+(s.id===c.s?" on":"")+'" data-c2k="s" data-c2v="'+esc(s.id)+'">'+(tema?'<span class="c2tema">'+esc(temaNom(temaDe(s))||subNom(s.grupo))+'</span>':'')+esc(s.nombre)+(mesesTxt(s)?'<span class="c2fecha">'+esc(mesesTxt(s))+'</span>':'')+'<small>'+esc(s.escena)+'</small></button>'}
 function sitsHtml(c){
-  const L=lista(c,c.w,c.q),sug=c.q?null:sugerida(L,c);
-  let h='<p class="c2ex">'+L.length+(L.length===1?' situación encaja':' situaciones encajan')+' con este objetivo'+(c.q?' y tu búsqueda':'')+'</p>';
-  if(!L.length)return h+'<p class="c2ex">Nada por aquí. Prueba otra pestaña o borra la búsqueda.</p>';
-  if(sug)h+='<div class="c2grp">Te sugerimos hoy</div>'+sitBtn(sug,c,true);
-  const G={};L.forEach(s=>{(G[s.grupo]=G[s.grupo]||[]).push(s)});
-  Object.keys(G).forEach(g=>{const open=!!c.q||G[g].some(s=>s.id===c.s&&(!sug||s.id!==sug.id));h+='<details class="c2gd"'+(open?" open":"")+'><summary>'+esc(g)+' <span>'+G[g].length+'</span></summary>'+G[g].map(s=>sitBtn(s,c,false)).join("")+'</details>'});
+  const L=lista(c,c.w,c.q);
+  if(c.q){
+    let h='<p class="c2ex">'+L.length+(L.length===1?' idea encaja':' ideas encajan')+' con tu búsqueda</p>';
+    return L.length?h+L.map(s=>sitBtn(s,c,true)).join(""):h+'<p class="c2ex">Nada con esa palabra. Prueba con otra más corta: noche, café, regalo, tiempo…</p>';
+  }
+  if(c.w==="hoy")return '<p class="c2ex">Cuatro ideas de temas distintos. Mañana salen otras. Si ninguna te encaja, toca un tema de arriba.</p>'+L.map(s=>sitBtn(s,c,true)).join("");
+  const G={};L.forEach(s=>{(G[s.grupo]=G[s.grupo]||[]).push(s)});const gs=Object.keys(G);
+  let h='';
+  if(gs.length>1)h+='<div class="c2sub">'+[["","Todo",L.length]].concat(gs.map(g=>[g,subNom(g),G[g].length])).map(x=>'<button type="button" class="'+((c.g||"")===x[0]?"on":"")+'" data-c2k="g" data-c2v="'+esc(x[0])+'">'+esc(x[1])+' <small>'+x[2]+'</small></button>').join("")+'</div>';
+  const sel=c.g&&G[c.g]?[c.g]:gs;
+  sel.forEach(g=>{if(sel.length>1)h+='<div class="c2grp">'+esc(subNom(g))+'</div>';h+=ordena(G[g],c.o).map(s=>sitBtn(s,c,false)).join("")});
   return h;
 }
 function viewForm(c){
@@ -2628,8 +2670,11 @@ function viewForm(c){
   let h=tipoTabs(c);
   h+='<section class="c2step"><div class="c2sn"><i>1</i><b>¿Para quién creas hoy?</b></div>'+viaCards(c)+'</section>';
   h+='<section class="c2step"><div class="c2sn"><i>2</i><b>¿Qué quieres conseguir hoy?</b></div><div class="c2chips">'+O.map(o=>'<button type="button" class="c2ch'+(o[0]===c.o?" on":"")+'" data-c2k="o" data-c2v="'+o[0]+'">'+esc(o[1])+'</button>').join("")+'</div><p class="c2ex">Ejemplo: '+esc(ob[2])+'</p></section>';
-  h+='<section class="c2step"><div class="c2sn"><i>3</i><b>¿De qué hablas hoy?</b></div><div class="c2when">'+WHEN.map(w=>{const n=lista(c,w[0],"").length;return '<button type="button" class="'+(c.w===w[0]?"on":"")+'" data-c2k="w" data-c2v="'+w[0]+'"'+(n?'':' disabled')+'>'+w[1]+' <small>'+n+'</small></button>'}).join("")+'</div>'
-   +'<input id="c2q" class="c2q" type="search" placeholder="Busca: noche, café, tiempo, vergüenza…" value="'+esc(c.q)+'" autocomplete="off"><div id="c2sits">'+sitsHtml(c)+'</div></section>';
+  const T=temas(c),tot=T.reduce((a,x)=>a+x[1],0);
+  h+='<section class="c2step"><div class="c2sn"><i>3</i><b>¿De qué hablas hoy?</b></div><p class="c2ex c2tot">Tienes <b>'+tot+' ideas</b> '+(c.v==="proyecto"?"para el proyecto":"para clientas")+'. Toca un tema o busca una palabra.</p>'
+   +'<input id="c2q" class="c2q" type="search" placeholder="Busca: noche, café, regalo, vergüenza…" value="'+esc(c.q)+'" autocomplete="off">'
+   +'<div class="c2temas'+(c.q?' off':'')+'">'+[["hoy",0]].concat(T).map(x=>'<button type="button" class="'+(c.w===x[0]?"on":"")+(x[0]==="hoy"?" hoy":"")+'" data-c2k="w" data-c2v="'+esc(x[0])+'">'+esc(temaNom(x[0]))+(x[1]?' <small>'+x[1]+'</small>':'')+'</button>').join("")+'</div>'
+   +'<div id="c2sits">'+sitsHtml(c)+'</div></section>';
   if(c.t==="st"){const mx=tipoCierre(c.o)==="encuesta"?7:8;h+='<details class="c2more"><summary>Más opciones (ya está lo recomendado)</summary><div class="c2grp">Número de stories</div><div class="c2chips">'+[2,3,4,5,6,7,8].filter(n=>n<=mx).map(n=>'<button type="button" class="c2ch'+(c.n===n?" on":"")+'" data-c2k="n" data-c2v="'+n+'">'+n+(n===3?" (recomendado)":"")+'</button>').join("")+'</div></details>'}
   h+='<button type="button" class="c2go" data-c2k="ver">Ver mi guion</button>';
   return h;
@@ -2717,7 +2762,7 @@ function viewRes(c,s){
 // guion de solo lectura (para Mi semana): mismas tarjetas que en Crear, sin los botones que cambian Crear
 function guionRO(it){
   const s=PK[it.s];if(!s)return "";
-  const c={t:it.t,v:it.v,o:s.objetivos.indexOf(it.o)>=0?it.o:s.objetivos[0],s:it.s,n:Math.max(2,Math.min(8,+it.n||3)),kw:it.kw||s.kw[0],hook:(+it.hook||0)%12,ci:+it.ci||0,ri:+it.ri||0,ti:+it.ti||0};
+  const c={t:it.t,v:it.v,o:vale(s,it.o)?it.o:s.objetivos[0],s:it.s,n:Math.max(2,Math.min(8,+it.n||3)),kw:it.kw||s.kw[0],hook:(+it.hook||0)%12,ci:+it.ci||0,ri:+it.ri||0,ti:+it.ti||0};
   if(tipoCierre(c.o)==="encuesta"&&c.n>7)c.n=7;
   let h=c.t==="st"?resStories(s,c):c.t==="re"?resReel(s,c):resTT(s,c);
   h=h.replace(/<button type="button" class="mini" data-c2k="(hook|ci|ri|ti)">[^<]*<\/button>/g,"");
@@ -2760,7 +2805,7 @@ function sitsListHtml(G,q){return Object.keys(G).map(g=>'<details class="panel c
 // ---------- eventos ----------
 function abrir(t,v,o,sid,extra){
   const c=st();c.t=t||c.t;c.v=v||c.v;c.o=o||c.o;c.q="";c.res=!!sid;
-  if(sid){const s=PK[sid];if(s){c.s=s.id;c.v=s.via;c.w=cuando(s)||"todo";c.kw=s.kw[0];c.own=false;c.hook=-1;if(s.objetivos.indexOf(c.o)<0)c.o=s.objetivos[0]}}
+  if(sid){const s=PK[sid];if(s){c.s=s.id;c.v=s.via;c.w=temaDe(s)||"hoy";c.g=c.w!=="hoy"&&lista(c,c.w,"").length>25?s.grupo:"";c.kw=s.kw[0];c.own=false;c.hook=-1;if(!vale(s,c.o))c.o=s.objetivos[0]}}
   else c.s="";
   if(extra!=null){const i=+extra||0;c.hook=(i*5)%12;c.ri=i%3;c.ti=i%5;c.ci=i%3}
   else{c.ri=0;c.ti=0;c.ci=0}
@@ -2773,7 +2818,8 @@ document.addEventListener("click",e=>{
    case "t":c.t=v==="re"||v==="tt"?v:"st";render(true);break;
    case "v":if(VIAS[v]&&c.v!==v){c.v=v;c.s="";c.kw="";c.q="";}render(true);break;
    case "o":c.o=v;c.s="";c.kw="";render(true);break;
-   case "w":c.w=v;c.q="";c.s="";c.kw="";render(true);break;
+   case "w":{c.w=v;c.g="";c.q="";c.s="";c.kw="";const L=v==="hoy"?[]:lista(c,v,"");if(L.length>25)c.g=L[0].grupo;render(true);break}
+   case "g":c.g=v||"";c.s="";c.kw="";render(true);break;
    case "s":if(PK[v]){c.s=v;c.kw=PK[v].kw[0];c.own=false;c.hook=-1;c.ci=0;c.ri=0;c.ti=0}render(true);break;
    case "n":c.n=Math.max(2,Math.min(8,+v||3));render(true);break;
    case "ver":c.res=true;render();break;
@@ -2784,7 +2830,7 @@ document.addEventListener("click",e=>{
    case "ti":c.ti++;render(true);break;
    case "save":{const s=PK[c.s];if(!s)break;const G=ls("ft_guiones")||[];G.unshift({titulo:({st:"Stories",re:"Reel",tt:"TikTok"}[c.t])+" · "+s.nombre,fecha:new Date().toLocaleDateString("es-ES"),texto:txtTodo(s,c)});ls("ft_guiones",G.slice(0,40));toast("Guardado en Mi cuenta");break}
    case "go":{const p=String(v||"").split("|");abrir(p[0],p[1],p[2],"");break}
-   case "use":{const s=PK[v];if(s)abrir(st().t,s.via,s.objetivos.indexOf(st().o)>=0?st().o:(s.objetivos.indexOf("escriban")>=0?"escriban":s.objetivos[0]),s.id);break}
+   case "use":{const s=PK[v];if(s)abrir(st().t,s.via,vale(s,st().o)?st().o:(s.objetivos.indexOf("escriban")>=0?"escriban":s.objetivos[0]),s.id);break}
    case "open":{const p=String(v||"").split("|");abrir(p[0],null,p[1],p[2],p[3]);break}
    case "wv":{const W=S.c2w||(S.c2w={});W.v=v==="proyecto"?"proyecto":"clientas";W.s="";render(true);break}
    case "sv":S.c2sv=v==="proyecto"?"proyecto":"clientas";S.c2sq="";render(true);break;
@@ -2792,7 +2838,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("input",e=>{
   const el=e.target;if(!el)return;
-  if(el.id==="c2q"){const c=st();c.q=el.value.slice(0,40);const box=document.getElementById("c2sits");if(box)box.innerHTML=sitsHtml(c);return}
+  if(el.id==="c2q"){const c=st();c.q=el.value.slice(0,40);const box=document.getElementById("c2sits");if(box)box.innerHTML=sitsHtml(c);const tm=document.querySelector(".c2temas");if(tm)tm.classList.toggle("off",!!c.q);return}
   if(el.id==="c2sq"){S.c2sq=el.value.slice(0,40);const v=S.c2sv||"clientas",qq=norm(S.c2sq).trim().split(/\s+/).filter(Boolean);const L=PKS.filter(s=>s.via===v&&(!qq.length||qq.every(x=>norm([s.nombre,s.escena,s.grupo,s.recurso].join(" ")).indexOf(x)>=0)));const G={};L.forEach(s=>{(G[s.grupo]=G[s.grupo]||[]).push(s)});const box=document.getElementById("c2slist");if(box)box.innerHTML=sitsListHtml(G,S.c2sq)}
 });
 document.addEventListener("change",e=>{
@@ -2807,7 +2853,7 @@ KWT.c2=(kw,own)=>{
   kwShowWarn("c2",kwIssues(c.kw,w=>[ctaLine(s,w,c.t)]),c.t==="tt"?"tiktok":"meta");
 };
 Object.assign(VIEWS,{crear:viewCrear2,semana:viewSemana2,situaciones:viewSits2});
-return {guionRO,PK,PKS,abrir,storiesDe,txtTodo,lista,asegurar,cuando,objLabel,tipoCierre,objsVia,sugerida,st};
+return {guionRO,PK,PKS,abrir,temaDe,vale,storiesDe,txtTodo,lista,asegurar,cuando,objLabel,tipoCierre,objsVia,sugerida,st};
 })();
 
 // ===== Fam Studio · TikTok LIVE, Prospectar, Beauty Party, Reto, Embarazo, Ganchos, 5·5·5 y búsqueda por palabra =====
@@ -2908,6 +2954,16 @@ function viewEmb(){
   return h;
 }
 
+function viewMorning(){
+  const M=NI.morning||{};
+  let h=H("Morning Glow",M.intro||"","Solo para el equipo");
+  h+='<section class="aviso eqaviso"><b>'+esc(M.aviso||"")+'</b></section>';
+  h+=P("Lo que lleva",(M.productos||[]).map(p=>'<div class="xmsg"><p><b>'+esc(prodN(p.id))+'</b> · '+esc(p.nota)+'</p></div>').join(""));
+  h+=P("Cómo se prepara",ol(M.receta))+P("Trucos",ul(M.trucos))+P("Cómo hablar de él en redes",ul(M.como_hablar))+P("Lo que nunca decimos",ul(M.nunca),"xnop");
+  h+='<div class="acts"><button type="button" class="btn" data-c2k="use" data-c2v="nc-morning-glow-coche">Crear contenido del Morning Glow</button></div>';
+  return h;
+}
+
 // ---------- Ganchos (sin huecos: todos escritos para su situación) ----------
 const TIPOS=[["negativo","Negativo","Avisa de un error o de algo que sale mal. Funciona porque nadie quiere equivocarse."],["contra corriente","Contra corriente","Dice algo que parece al revés de lo normal y luego lo explica."],["curiosidad","Curiosidad","Deja una pregunta en el aire que solo se resuelve si siguen mirando."],["fórmula","Fórmula","Promete enseñar cómo hacer algo concreto."],["historia","Historia","Empieza por algo que te pasó, con un detalle real."],["enemigo común","Enemigo común","Señala algo que nos fastidia a todas."],["pregunta","Pregunta","Una pregunta en la que la persona se reconoce."],["regla del tres","Regla del tres","Tres cosas, tres pasos o tres errores: se entiende de un vistazo."],["reto","Reto","Invita a probar algo unos días, sin prometer resultados."],["cotilla","Cotilla","Enseña algo tuyo que da curiosidad ver."],["sorpresa","Sorpresa","Un dato o un momento que no se espera."],["robado","Robado","Una frase real que te dijo alguien."]];
 const ALLG=[];(DB.paquetes||[]).forEach(s=>(s.pk&&s.pk.ganchos||[]).forEach(g=>ALLG.push({t:g.t,tipo:g.tipo,s})));
@@ -2926,7 +2982,7 @@ function gResHtml(){
   if(!norm(q).trim()){
     // sin búsqueda: cada tipo explicado con dos ejemplos reales del banco (cambian cada día)
     const day=hash(new Date().toDateString());
-    return TIPOS.map((t,ti)=>[t,ti]).filter(x=>!tipo||x[0][0]===tipo).map(([t,ti])=>{const L=ALLG.filter(g=>g.tipo===t[0]&&(!via||g.s.via===via));const ex=L.length?[L[(day+ti*131)%L.length],L[(day*7+ti*389+L.length/2|0)%L.length]]:[];
+    return TIPOS.map((t,ti)=>[t,ti]).filter(x=>!tipo||x[0][0]===tipo).map(([t,ti])=>{const L=ALLG.filter(g=>g.tipo===t[0]&&(!via||g.s.via===via));const ex=L.length?[L[((day+ti*131)>>>0)%L.length],L[((day*7+ti*389+(L.length>>1))>>>0)%L.length]]:[];
       return '<section class="panel xg"><h3>'+esc(t[1])+'</h3><p class="mut">'+esc(t[2])+'</p><ul class="hooks">'+ex.map(g=>'<li>'+esc(g.t)+' <small class="mut">· '+esc(g.s.nombre)+'</small> <button type="button" class="mini" data-copy="'+esc(g.t)+'">Copiar</button></li>').join("")+'</ul></section>'}).join("");
   }
   const L=gBusca(q,via,tipo);
@@ -2971,7 +3027,7 @@ function panel555(){
 
 // ---------- montaje en las vistas existentes ----------
 const _equipo=VIEWS.equipo,_paises=VIEWS.eq_paises,_numeros=viewNumeros,_recursos=viewRecursos;
-const XCARDS=[["eq_prospectar","Prospectar","Lista F.R.A.N.C., AIDA, mensajes y tu 5·5·5"],["eq_beauty","Mi Beauty Party","Organizador paso a paso, guion y pedidos"],["eq_reto","Reto 21 días","Cómo funciona, cómo se entra y mensajes"],["eq_embarazo","Complementos y embarazo","Orientación interna, siempre con su médico"],["tt_live","TikTok LIVE","Guion, preparación y normas para no tener problemas"]];
+const XCARDS=[["eq_prospectar","Prospectar","Lista F.R.A.N.C., AIDA, mensajes y tu 5·5·5"],["eq_beauty","Mi Beauty Party","Organizador paso a paso, guion y pedidos"],["eq_reto","Reto 21 días","Cómo funciona, cómo se entra y mensajes"],["eq_morning","Morning Glow","Qué es, cómo se prepara y cómo hablar de él"],["eq_embarazo","Complementos y embarazo","Orientación interna, siempre con su médico"],["tt_live","TikTok LIVE","Guion, preparación y normas para no tener problemas"]];
 VIEWS.equipo=function(){
   const h=_equipo();
   const extra='<h3 class="xeqh">Más herramientas del equipo</h3><div class="eqcards">'+XCARDS.map(c=>'<button type="button" class="eqc plain" data-tab="'+c[0]+'"><span class="eqcs"><b>'+esc(c[1])+'</b><small>'+esc(c[2])+'</small></span></button>').join("")+'</div>';
@@ -2987,7 +3043,7 @@ VIEWS.eq_paises=function(){
 const numeros=function(){return panel555()+_numeros()};
 const recursos=function(){return kwBuscaPanel()+_recursos()};
 Object.assign(VIEWS,{numeros,recursos});
-Object.assign(VIEWS,{tt_live:viewLive,eq_prospectar:viewPros,eq_beauty:viewBeauty,eq_reto:viewReto,eq_embarazo:viewEmb,ganchos:viewGanchos2});
+Object.assign(VIEWS,{tt_live:viewLive,eq_prospectar:viewPros,eq_beauty:viewBeauty,eq_reto:viewReto,eq_embarazo:viewEmb,eq_morning:viewMorning,ganchos:viewGanchos2});
 
 document.addEventListener("click",e=>{
   const b=e.target.closest&&e.target.closest("button[data-xk]");if(!b)return;
@@ -3150,7 +3206,7 @@ document.addEventListener("click",ev=>{
    case "done":{const X=L(),it=X.find(x=>x.id===id);if(it){it.done=!it.done;setItems(e.wk,X);render(true)}break}
    case "del":e.del=id;render(true);break;
    case "delok":{setItems(e.wk,L().filter(x=>x.id!==id));e.del="";render(true);break}
-   case "open":{const it=L().find(x=>x.id===id);if(!it)break;S.c2=Object.assign({w:"todo",q:"",res:true},snap(it));S.c2.w=C2.cuando(C2.PK[it.s])||"todo";S.c2.fromPlan={wk:e.wk,id:it.id};S.c2.target=null;go("crear");break}
+   case "open":{const it=L().find(x=>x.id===id);if(!it)break;S.c2=Object.assign({w:"todo",q:"",res:true},snap(it));S.c2.w=(C2.PK[it.s]?C2.temaDe(C2.PK[it.s]):"")||"hoy";S.c2.g="";S.c2.fromPlan={wk:e.wk,id:it.id};S.c2.target=null;go("crear");break}
    case "add":{const c0=C2.st();c0.target={wk:e.wk,d:+b.dataset.pv};c0.fromPlan=null;c0.res=false;go("crear");break}
    case "cancel":c.target=null;render(true);break;
    case "back":c.fromPlan=null;c.res=false;go("semana");break;
@@ -3172,9 +3228,9 @@ return {resBox,destino,items,generar,textoSemana,wkHoy};
 
 // ===== Fam Studio · navegación, inicio, instalación y administración =====
 const NAV=[["home","Inicio"],["crear","Crear"],["semana","Semana"],["recursos","Recursos"],["equipo","Equipo"],["mas","Más"]];
-const PARENT={situaciones:"mas",ganchos:"mas",formatos:"mas",cuadricula:"mas",revisor:"mas",guia:"mas",ayuda:"mas",perfil:"mas",instalar:"mas",admin:"mas",negocio:"mas",perfil_ig:"mas",numeros:"mas",guia_det:"recursos",pronto:"home",tt_idea:"home",tt_stories:"home",tt_plantillas:"home",tt_banco:"home",tt_historia:"home",tt_respuestas:"home",tt_bio:"home",tt_semana:"home",normas:"mas",tt_live:"home",eq_prospectar:"equipo",eq_beauty:"equipo",eq_reto:"equipo",eq_embarazo:"equipo",eq_semana:"equipo",eq_calendario:"equipo",eq_formaciones:"equipo",eq_guias:"equipo",eq_herramientas:"equipo",eq_paises:"equipo",eq_terminos:"equipo",eq_presentar:"equipo",eq_ventas:"equipo",eq_normas:"equipo"};
+const PARENT={situaciones:"mas",ganchos:"mas",formatos:"mas",cuadricula:"mas",revisor:"mas",guia:"mas",ayuda:"mas",perfil:"mas",instalar:"mas",admin:"mas",negocio:"mas",perfil_ig:"mas",numeros:"mas",guia_det:"recursos",pronto:"home",tt_idea:"home",tt_stories:"home",tt_plantillas:"home",tt_banco:"home",tt_historia:"home",tt_respuestas:"home",tt_bio:"home",tt_semana:"home",normas:"mas",tt_live:"home",eq_prospectar:"equipo",eq_beauty:"equipo",eq_reto:"equipo",eq_embarazo:"equipo",eq_morning:"equipo",eq_semana:"equipo",eq_calendario:"equipo",eq_formaciones:"equipo",eq_guias:"equipo",eq_herramientas:"equipo",eq_paises:"equipo",eq_terminos:"equipo",eq_presentar:"equipo",eq_ventas:"equipo",eq_normas:"equipo"};
 const parentOf=t=>(t==="negocio"&&S.negFrom==="equipo")?"equipo":PARENT[t];
-const TITLES={situaciones:"Situaciones",ganchos:"Ganchos",formatos:"Formatos",cuadricula:"Cuadrícula",revisor:"Revisor",guia:"Guía del método",ayuda:"Cómo se usa",perfil:"Mi cuenta",instalar:"Instalar en el móvil",admin:"Administración",negocio:"Mi negocio",perfil_ig:"Mi perfil de Instagram",numeros:"Mis números",guia_det:"Recurso",pronto:"Próximamente",tt_idea:"Idea del día",tt_stories:"Stories para TikTok",tt_plantillas:"Plantillas",tt_banco:"Ideas escritas",tt_historia:"Mi historia en 60 segundos",tt_respuestas:"Responder comentarios",tt_bio:"Mi bio de TikTok",tt_semana:"Mi semana en TikTok",normas:"Lo que no se dice",tt_live:"TikTok LIVE",eq_prospectar:"Prospectar",eq_beauty:"Mi Beauty Party",eq_reto:"Reto 21 días",eq_embarazo:"Complementos y embarazo",equipo:"Equipo",eq_semana:"Mi primera semana",eq_calendario:"Calendario del equipo",eq_formaciones:"Formaciones",eq_guias:"Guías y plantillas",eq_herramientas:"Herramientas y canales",eq_paises:"Países y kits",eq_terminos:"Términos",eq_presentar:"Cómo presentar",eq_ventas:"Vender y recomendar",eq_normas:"Normas y organización"};
+const TITLES={situaciones:"Situaciones",ganchos:"Ganchos",formatos:"Formatos",cuadricula:"Cuadrícula",revisor:"Revisor",guia:"Guía del método",ayuda:"Cómo se usa",perfil:"Mi cuenta",instalar:"Instalar en el móvil",admin:"Administración",negocio:"Mi negocio",perfil_ig:"Mi perfil de Instagram",numeros:"Mis números",guia_det:"Recurso",pronto:"Próximamente",tt_idea:"Idea del día",tt_stories:"Stories para TikTok",tt_plantillas:"Plantillas",tt_banco:"Ideas escritas",tt_historia:"Mi historia en 60 segundos",tt_respuestas:"Responder comentarios",tt_bio:"Mi bio de TikTok",tt_semana:"Mi semana en TikTok",normas:"Lo que no se dice",tt_live:"TikTok LIVE",eq_prospectar:"Prospectar",eq_beauty:"Mi Beauty Party",eq_reto:"Reto 21 días",eq_embarazo:"Complementos y embarazo",eq_morning:"Morning Glow",equipo:"Equipo",eq_semana:"Mi primera semana",eq_calendario:"Calendario del equipo",eq_formaciones:"Formaciones",eq_guias:"Guías y plantillas",eq_herramientas:"Herramientas y canales",eq_paises:"Países y kits",eq_terminos:"Términos",eq_presentar:"Cómo presentar",eq_ventas:"Vender y recomendar",eq_normas:"Normas y organización"};
 const isStandalone=()=>{try{return window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}};
 const platform=()=>{const u=navigator.userAgent||"";if(/iPhone|iPad|iPod/i.test(u)||(/Macintosh/.test(u)&&"ontouchend" in document))return "ios";if(/Android/i.test(u))return "android";return "otro"};
 

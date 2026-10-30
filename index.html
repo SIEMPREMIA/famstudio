@@ -565,6 +565,20 @@ details.c2card[open] summary:after{content:"Ocultar"}
 .c2srow{border-top:1px solid var(--crd);padding:10px 0;display:grid;gap:3px}
 .c2srow small{color:var(--mut);font-size:.8rem}.c2srow .mini{justify-self:start;margin-top:4px}
 @media (max-width:380px){.c2day{grid-template-columns:76px 1fr}.c2day .mini{grid-column:1/-1;justify-self:start}}
+/* paso 3: temas */
+.c2tot{margin:0 0 8px}.c2tot b{color:var(--br)}
+.c2temas{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.c2temas.off{opacity:.45}
+.c2temas button{border:1px solid var(--crd);background:var(--crl);color:var(--brd);border-radius:18px;padding:8px 13px;font:600 .86rem/1.1 inherit;font-family:inherit;cursor:pointer}
+.c2temas button small{font-weight:500;opacity:.7;margin-left:2px}
+.c2temas button.hoy{border-color:var(--ok)}
+.c2temas button.on{background:var(--brd);color:var(--cr);border-color:var(--brd)}
+.c2sub{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin-bottom:4px;scrollbar-width:none}
+.c2sub::-webkit-scrollbar{display:none}
+.c2sub button{flex:none;border:1px solid var(--br);background:transparent;color:var(--br);border-radius:14px;padding:6px 11px;font:600 .78rem/1 inherit;font-family:inherit;cursor:pointer;white-space:nowrap}
+.c2sub button.on{background:var(--br);color:var(--cr)}
+.c2sub button small{opacity:.7}
+.c2tema{display:block;font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8a5a3c;margin-bottom:3px}
 
 /* ===== LIVE, Prospectar, Beauty Party, Reto, Embarazo, Ganchos, 5·5·5 ===== */
 .xh .rbadge{margin-bottom:6px;display:inline-block}
@@ -686,5 +700,5 @@ details.plgd>summary{cursor:pointer;font-size:.8rem;font-weight:700;color:var(--
 <nav id="bnav" aria-label="Secciones"></nav>
 </div>
 <div id="toast" role="status"></div>
-<script src="shell.js?v=20261029195808"></script>
+<script src="shell.js?v=20261030131518"></script>
 </body></html>
