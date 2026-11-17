@@ -36,6 +36,11 @@ const norm=t=>t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
 const PROD={},GUIA={};
 DB.products.forEach(p=>{PROD[p.id]=p});
 DB.guias.forEach(g=>{GUIA[g.id]=g});
+// C21: tres guías se fusionaron con otra. Lo que la usuaria guardó en su móvil con el id viejo (contactos, copias de seguridad)
+// sigue abriendo la guía nueva: GUIA[id viejo] la devuelve (sin salir al listar) y guiaId() cambia el id donde se guarda o se compara.
+const GUIA_ALIAS={"la-rutina-minima":"rutina-noche-tres-pasos","cinco-preguntas-antes-de-empezar":"preguntas-que-dan-apuro","mi-martes-real":"tu-semana-con-tu-nombre"};
+const guiaId=id=>Object.prototype.hasOwnProperty.call(GUIA_ALIAS,id)?GUIA_ALIAS[id]:id;
+Object.keys(GUIA_ALIAS).forEach(v=>{if(GUIA[GUIA_ALIAS[v]]&&!GUIA[v])Object.defineProperty(GUIA,v,{value:GUIA[GUIA_ALIAS[v]],enumerable:false})});
 
 // ===== utilidades de seguridad para la administración =====
 // Solo se aceptan enlaces https:// cuyo dominio esté en esta lista (la misma que valida el build para content/equipo.json)
@@ -831,14 +836,14 @@ function viewAyuda(){
   const G=(tab,t,a)=>'<p class="ay-go"><button type="button" class="btn ghost" '+(a?(a.slice(0,4)==="vis:"?'data-vis="'+a.slice(4)+'"':'data-act="'+a+'"'):'data-tab="'+tab+'"')+'>'+t+'</button></p>';
   h+=D("Qué es Fam Studio y para quién",'<p>Fam Studio es la app del equipo Fam Team para quien reparte Farmasi y no sabe nada de redes. Te dice qué publicar en Instagram y en TikTok: qué grabar, qué escribir en pantalla y qué decir. Y cuando alguien te escribe, te da lo que le mandas: el mensaje, la mini guía y el seguimiento.</p><p>No hay cuentas ni contraseñas personales: entras con el código del equipo y todo lo que apuntas se queda en tu móvil.</p>'+G("","Ver el tutorial otra vez","vis:bienv"),true);
   h+=D("Tu primer día",'<ol class="steps"><li><b>El tutorial.</b> Son seis pantallas animadas la primera vez que abres la app: qué publicar, cómo sale tu guion, cómo se graba, qué mandas cuando te escriben, tu semana y que todo se queda en tu móvil. Puedes verlo otra vez con el botón de arriba o desde Más.</li><li><b>Tu primera semana.</b> En Inicio verás cinco pasos para empezar sin perderte: tu bio, tus primeras stories, tu primer reel, tu semana y tu primer contacto. Se marcan solos cuando los haces, o con el círculo. Si no la ves, pulsa «Ver Tu primera semana» (arriba). Cuando ya no la quieras, toca «Ya sé por dónde voy».</li><li><b>Tu bio.</b> En Inicio, en «Tu perfil», tocas «Tu bio» y contestas unas preguntas cortas (la de tu zona es opcional) y te preparo seis bios de Instagram de 150 caracteres como máximo. Eliges una y tocas «Esta es la mía».</li><li><b>Y para completar tu perfil.</b> En la misma pantalla tienes la bio de TikTok, la publicación de presentación, las destacadas y «Revisar mi bio» por si ya tienes una.</li></ol><p class="note">No la confundas con «Tus primeros siete días en el equipo», que está en Equipo y es la lista de tareas de tus siete primeros días repartiendo Farmasi.</p>'+G("perfil_ig","Ir a Tu bio"));
-  h+=D("Tu bio",E("bio")+'<p>Tu bio es lo primero que lee quien llega a tu perfil: quién eres, de qué hablas y qué hacer ahora, en 150 caracteres. Está en Inicio, en «Tu perfil».</p><ol class="steps"><li><b>Contesta unas preguntas cortas.</b> Para quién publicas, de qué hablas y, si quieres, de qué zona eres (tu provincia o tu isla, que eliges de una lista).</li><li><b>Elige entre seis.</b> Te preparo seis bios con tus respuestas. Tocas la que más se parezca a ti y te dice cuántos caracteres lleva.</li><li><b>Cópiala y pégala</b> en tu perfil de Instagram. Si ya tienes una, «Revisar mi bio» te dice qué está bien y qué se puede mejorar.</li></ol>'+G("perfil_ig","Ir a Tu bio"));
+  h+=D("Tu bio",E("bio")+'<p>Tu bio es lo primero que lee quien llega a tu perfil: quién eres, de qué hablas y qué hacer ahora, en 150 caracteres. Está en Inicio, en «Tu perfil».</p><ol class="steps"><li><b>Contesta unas preguntas cortas.</b> Para quién publicas, de qué hablas y, si quieres, de qué zona eres (tu provincia o tu isla, que eliges de una lista).</li><li><b>Elige entre seis.</b> Te preparo seis bios con tus respuestas. Tocas la que más se parezca a ti y te dice cuántos caracteres lleva.</li><li><b>Mírala en tu perfil.</b> Cada bio sale dentro de una maqueta de perfil, como la verá quien llegue. Pasas de una a otra con las flechas o deslizando, y arriba eliges «Sin emojis» o «Con emojis» (se ve al momento y se acuerda de lo que elijas).</li><li><b>Cópiala y pégala</b> en tu perfil de Instagram: «Copiar» te da justo la que estás viendo. Con «Guardar imagen» te llevas la maqueta como foto para mandarla. Si ya tienes una bio, «Revisar mi bio» te dice qué está bien y qué se puede mejorar.</li></ol>'+G("perfil_ig","Ir a Tu bio"));
   h+=D("Crear una publicación",E("crear")+'<ol class="steps"><li><b>Elige qué creas:</b> Stories, Reel o TikTok, en los botones de arriba. El interruptor Instagram | TikTok es el mismo que el de Inicio: si eliges TikTok, Crear te abre en TikTok.</li><li><b>«¿Para quién creas hoy?»</b> Clientas (vender y recomendar productos) o Proyecto (sumar gente al equipo).</li><li><b>«Hoy quiero…»</b> Llegar a gente nueva, contar algo mío o recibir mensajes. Con clientas puedes también enseñar un producto o invitar al reto o al taller del martes; con el proyecto, invitar a una formación. Cada opción cambia el gancho, las stories y el final. Si una propuesta no tiene situaciones en esta época, sale con «Ahora no hay situaciones para esto» y el mes en que vuelven.</li><li><b>«¿De qué hablas hoy?»</b> Eliges una situación: en «Para hoy» salen cuatro de temas distintos (mañana, otras); o tocas un tema, o buscas una palabra (noche, café, regalo…).</li><li><b>Toca «Ver mi guion».</b> Te sale todo hecho. Si no te convence un gancho o un cierre, pulsa «Otro gancho» u «Otro cierre».</li><li><b>Cuando acabes:</b> «Copiar todo», «Añadir a mi semana» (eliges la semana, el día y el momento) o «Guardar en mi cuenta».</li></ol><p><b>Herramientas.</b> El botón «Herramientas», arriba a la derecha, abre las que te ayudan a crear: Situaciones, Ganchos, Cuadrícula, Revisor y Lo que no se dice.</p><p class="note">La palabra clave que te sugerimos cambia según la situación. Puedes tocar «Cambiar» y elegir otra o escribir la tuya, siempre una sola palabra, y la app te avisa si se salta las normas de Instagram.</p>'+G("crear","Ir a Crear"));
   h+=D("Grabar: reel, stories y modo de grabación",E("uno")+'<p><b>Reel.</b> Eliges entre tres maneras:</p><ul><li><b>De una frase:</b> un solo plano y una frase escrita arriba. Es la más fácil y no hace falta hablar.</li><li><b>Por planos:</b> varios planos seguidos, cada uno con su texto.</li><li><b>Serie de 3 días:</b> tres reels, uno por día, cada parte con su foto de ejemplo. Solo sale en las situaciones que la tienen.</li></ul><p><b>Stories.</b> Una secuencia de 2 a 8 (te recomendamos 3); el número lo cambias arriba del resultado. Pulsa <b>«Ver una a una»</b> y pasas al modo de grabación: una story por pantalla, con «Esta story sirve para», una foto de ejemplo, <b>«El plano»</b> (cómo colocar el móvil) y tres pasos: Graba, Escribe y Di. Con «Siguiente» y «Anterior» avanzas y retrocedes; «Salir» vuelve a la lista. Si la story pide palabra clave, «Cambiar la palabra» la cambia sin salir.</p><p><b>Stories para TikTok.</b> Desde el Inicio de TikTok son las mismas stories con los textos de TikTok: la palabra se escribe en grande y te contestan en los comentarios, sin pegatinas. «Verlas para Instagram» las pasa a Instagram.</p><p><b>TikTok.</b> Un vídeo de unos 7 segundos con un solo plano, el texto arriba y la palabra clave abajo.</p><p class="note">Las fotos de ejemplo son de bancos de imágenes libres, para que te hagas una idea del plano. No son tuyas: graba la tuya. En un mismo guion no se repite ninguna, y si una foto no carga, ves solo el texto de esa pieza.</p>'+G("crear","Ir a Crear"));
   h+=D("Cuando alguien te escribe la palabra",E("mandas")+'<ol class="steps"><li><b>Busca lo que mandas.</b> Debajo de cada guion, en Crear, tienes «Lo que mandas cuando te escriban» (si el final no pide palabra, se llama «Si alguien te escribe por esto»). También puedes ir a Recursos y escribir la palabra en «¿Te han escrito una palabra?»: te sale la guía y la situación que la usan, y si no está, las palabras más parecidas.</li><li><b>El mensaje con la guía.</b> Es lo primero que envías por privado: «Copiar mensaje» (o «Copiar mensaje y guía» si la situación no trae mini guía).</li><li><b>La guía.</b> Casi siempre es una mini guía: páginas que guardas con «Guardar PDF» o «Guardar esta página», o mandas con «Compartir guía» si tu móvil lo permite. Además tienes una versión corta en una sola imagen («Guardar imagen») y el texto para copiar, por si prefieres mandarlo escrito.</li><li><b>El seguimiento.</b> A los 2 o 3 días, si no ha contestado, un recordatorio sin presión: «Copiar seguimiento».</li><li><b>WhatsApp.</b> Cuando ya hay confianza, pásala a WhatsApp con un mensaje corto. Si guardas tu teléfono en Mi cuenta, se pone solo en los mensajes de Recursos.</li></ol>'+G("recursos","Ir a Recursos"));
   h+=D("Semana",E("semana")+'<ol class="steps"><li><b>«Crear mi semana rápida».</b> Eliges cuántos reels (se publican por la mañana), cuántas secuencias de stories y cuántos TikTok al día, cuántos de ellos para el proyecto y cuántos para clientas, si el tema es el mismo toda la semana o distinto cada vez, y tu día de descanso. Con «Preparar mi semana» la app lo reparte por días.</li><li><b>Cámbialo todo.</b> En cada publicación puedes marcarla como publicada con el círculo, moverla a otro día, quitarla («Quitar») o abrirla con «Editar en Crear». Con «+ Añadir a este día» pones lo que quieras.</li><li><b>Desde Crear</b> también la añades: al final del guion, «Añadir a mi semana».</li><li><b>La semana que viene</b> se ve con las flechas de arriba, y con «Copiar mi semana» te la mandas por WhatsApp.</li></ol><p><b>El aviso en el calendario.</b> Cuando tienes publicaciones puestas, arriba aparece «Añadir a mi calendario»: se descarga un archivo que se abre con el calendario de tu móvil y te avisa un cuarto de hora antes de cada publicación de esta semana y de la siguiente. Si cambias algo en Semana, vuelve a pulsarlo.</p>'+G("semana","Ir a Semana"));
   h+=D("Mis contactos",E("contactos")+'<p>Cuando copias un mensaje con la guía, la app te pregunta «¿A quién se la mandas?». Escribe solo un nombre o un alias (nada de teléfonos) y toca «Apuntar»; se guarda en tu móvil.</p><ul><li>A partir de los 2 días, en Inicio te aparece «Escríbele a…» con el mensaje de seguimiento ya preparado. Lo copias, le escribes y tocas «Hecho».</li><li>En Mis contactos cada persona tiene su estado: «Guía enviada», «Le escribí otra vez» y, después, «Es clienta», «Le interesa el proyecto» o «Ahora no».</li><li>Mis contactos está en Recursos, justo debajo de «¿Te han escrito una palabra?».</li><li>Si le has contestado a una pega («Qué contestar cuando te dicen…»), también puedes apuntarlo: queda como «Pega contestada» y no te avisa para escribirle de nuevo. En la ficha de cada contacto, «Me ha puesto una pega» te lleva a esa pantalla.</li><li>Puedes añadir a alguien a mano, ponerle una nota corta o borrarlo.</li><li>Si le dices «Ahora no» tres veces seguidas a la pregunta «¿A quién se la mandas?», deja de preguntarte. Lo reactivas en Mis contactos con «Volver a preguntarme».</li></ul>'+G("contactos","Ir a Mis contactos"));
   h+=D("Lo que te funciona",E("funciona")+'<p>Está en Semana, al final, en «¿Cómo voy?», junto a Mis números. Lo apuntas tú, en dos toques. Cuando marcas una publicación como publicada en Semana, al día siguiente Inicio te pregunta «¿Cuántas personas te escribieron?»: Ninguna, 1 o 2, 3 a 5, Más de 5 o No lo sé.</p><p>Cuando tienes seis publicaciones apuntadas, la app compara lo que has publicado al menos dos veces y te dice qué te trae más mensajes: según para qué publicas, el formato, tus mejores ganchos y tus mejores temas. Solo cuenta lo que tú apuntas y se guarda en tu móvil. En Inicio también puedes fijar cuántas publicaciones quieres hacer cada semana.</p>'+G("funciona","Ir a Lo que te funciona"));
-  h+=D("Recursos",E("recursos")+'<p>Es donde está todo lo que mandas por privado. Arriba escribes la palabra en «¿Te han escrito una palabra?» y, debajo, eliges entre dos listas y una pantalla propia:</p><ul><li><b>Guías:</b> con su mensaje, su guía, su tarjeta y su seguimiento. Se ordenan para clientas y para el proyecto, y las buscas por título o por palabra clave.</li><li><b>Mensajes del día a día:</b> dar las gracias, reactivar a alguien, responder a «me lo pienso»…</li><li><b>Qué contestar cuando te dicen…:</b> alguien te pone una pega («es caro», «no tengo tiempo», «me da vergüenza salir en redes»). Eliges Clientas o Proyecto, escribes lo que te ha dicho o buscas por temas, y abres la pega: tienes tres respuestas para copiar, lo que no conviene decir, el siguiente paso y otras parecidas. También entras desde Inicio y desde cada contacto de Mis contactos («Me ha puesto una pega»).</li></ul><p>Debajo del buscador tienes también <b>Mis contactos</b>.</p><p>Cada mensaje tiene su botón para copiarlo. Lo que prepara tu equipo sale con la etiqueta «Del equipo».</p>'+G("recursos","Ir a Recursos"));
+  h+=D("Recursos",E("recursos")+'<p>Es donde está todo lo que mandas por privado. Arriba escribes la palabra en «¿Te han escrito una palabra?» y, debajo, eliges entre tres listas y una pantalla propia:</p><ul><li><b>Guías:</b> con su mensaje, su guía, su tarjeta y su seguimiento. Eliges Clientas o Proyecto y, debajo, un tema (Piel, Maquillaje, Nutrición, Dudas antes de empezar…) o «Todas». Las buscas por título, palabra, tema o para quién es; al buscar se miran todos los temas.</li><li><b>Mini guías de situaciones:</b> cada situación de Crear trae su mini guía, y aquí están todas, ordenadas por grupos que se abren al tocarlos. Abres una, copias el mensaje, guardas o compartes el PDF, o pulsas «Abrir esta situación en Crear».</li><li><b>Mensajes del día a día:</b> dar las gracias, reactivar a alguien, responder a «me lo pienso»…</li><li><b>Qué contestar cuando te dicen…:</b> alguien te pone una pega («es caro», «no tengo tiempo», «me da vergüenza salir en redes»). Eliges Clientas o Proyecto, escribes lo que te ha dicho o buscas por temas, y abres la pega: tienes tres respuestas para copiar, lo que no conviene decir, el siguiente paso y otras parecidas. También entras desde Inicio y desde cada contacto de Mis contactos («Me ha puesto una pega»).</li></ul><p>Debajo del buscador tienes también <b>Mis contactos</b>.</p><p>Cada mensaje tiene su botón para copiarlo. Lo que prepara tu equipo sale con la etiqueta «Del equipo».</p>'+G("recursos","Ir a Recursos"));
   h+=D("Qué contestar cuando te dicen…",'<p>Cuando alguien te pone una pega («es caro», «no tengo tiempo», «me da vergüenza salir en redes»), aquí tienes qué responder. Está en Recursos, y también en Inicio (abajo del todo) y en cada contacto de Mis contactos («Me ha puesto una pega»).</p><ol class="steps"><li><b>Elige el camino:</b> Clientas o Proyecto. La app recuerda el último que usaste.</li><li><b>Escribe lo que te ha dicho</b> en el buscador, aunque sea con otras palabras o con alguna falta: te sale lo más parecido. O abre un tema y elige la pega de la lista.</li><li><b>Lee lo que hay detrás</b> y elige una de las tres respuestas (corta, con mi ejemplo o con una pregunta). «Copiar respuesta» la copia entera: cámbiale las palabras para que suene a ti.</li><li><b>Mira «No digas»</b> y «Si cae bien, el siguiente paso».</li><li><b>Apúntalo:</b> «Apuntar a quién se lo he contestado» lo guarda en Mis contactos con la pega que era, sin teléfonos. Abajo tienes otras pegas parecidas.</li></ol><p class="note">Son mensajes para contestar a quien ya te ha escrito.</p>'+G("objeciones","Ir a Qué contestar cuando te dicen…"));
   h+=D("Equipo",'<p>Es solo para el equipo. Dentro tienes:</p><ul><li><b>Tus primeros siete días en el equipo:</b> la lista de tareas de tus siete primeros días repartiendo Farmasi, con casillas para marcar.</li><li><b>Calendario del equipo</b> (las formaciones de lunes a viernes a las 20:00, hora de España), <b>Formaciones</b>, <b>Guías y plantillas</b>, <b>Herramientas y canales</b>, <b>Países y kits</b>, <b>Términos</b>, <b>Cómo presentar</b>, <b>Vender y recomendar</b> y <b>Normas y organización</b>.</li><li><b>Mi proyecto</b> y <b>Mi Beauty Party</b>, que tienen su propio apartado más abajo.</li><li>Más herramientas: Prospectar, Reto 21 días, Morning Glow y Complementos y embarazo.</li></ul>'+G("equipo","Ir a Equipo"));
   h+=D("TikTok LIVE",'<p>Un directo sirve para que te conozcan de verdad: te ven, te oyen y te preguntan en el momento. Está en el Inicio de TikTok, en «Directos» (cambia el interruptor Instagram | TikTok de arriba).</p><ol class="steps"><li><b>Elige para qué es:</b> «Directo para clientas» o «Directo para el proyecto». Debajo ves el objetivo y qué pides al final.</li><li><b>Abre un guion.</b> Cada uno dice qué necesitas, cuánto dura y, minuto a minuto, lo que haces y lo que dices. «Copiar lo que dices» copia solo esa parte.</li><li><b>Pulsa «Seguirlo en directo»</b> y lo lees a pantalla grande, bloque a bloque, con un reloj: «Empiezo» lo arranca, «Siguiente» y «Anterior» cambian de bloque y «Salir» te devuelve al guion.</li><li><b>Antes y después:</b> los plegables de abajo traen qué comprobar antes de darle a emitir, los requisitos de TikTok, qué hacer si pasa algo, lo que no se dice en un directo y una lista para marcar al terminar.</li></ol>'+G("tt_live","Ir a TikTok LIVE"));
@@ -850,7 +855,7 @@ function viewAyuda(){
    +L("Inicio","¿Qué hago hoy? «Hoy te toca»: tu primera semana, la idea de hoy, a quién escribir y, en «Tu perfil», tu bio y tu publicación de presentación. Con TikTok elegido, el Inicio sigue este orden: qué publico hoy, «Tu perfil de TikTok» (Mi bio y Mi historia en 60 segundos), «Directos» (<b>TikTok LIVE</b>: elige si el directo es para clientas o para el proyecto, mira el objetivo, abre un guion y pulsa «Seguirlo en directo» para leerlo minuto a minuto con un reloj) y «Comentarios» (Responder comentarios).")
    +L("Crear","¿Qué publico? Aquí preparas una publicación: <b>Stories</b>, <b>Reel</b> o <b>TikTok</b>, y con «Herramientas» tienes Situaciones, Ganchos, Cuadrícula, Revisor y Lo que no se dice.")
    +L("Semana","¿Cómo voy? Tu calendario: qué publicar cada día, editable y guardado en tu móvil, con Lo que te funciona y Mis números.")
-   +L("Recursos","¿Qué contesto? Las guías, qué contestar cuando te ponen una pega, los mensajes que mandas por privado y Mis contactos.")
+   +L("Recursos","¿Qué contesto? Las guías por tema, las mini guías de las situaciones, qué contestar cuando te ponen una pega, los mensajes que mandas por privado y Mis contactos.")
    +L("Equipo","¿Qué pasa en el equipo? Lo que es solo para el equipo.")
    +L("Más","La app en sí: Cómo se usa, el tutorial, Instalar en el móvil, Guía del método, Mi cuenta y Administración.")+'</dl>'
    +'<p class="note">La opción en la que estás aparece marcada en la barra. Si te pierdes, toca Inicio.</p>');
@@ -1001,7 +1006,7 @@ document.addEventListener("input",e=>{
 // Todo el contenido llega como datos (DB). Cada texto dinámico pasa por esc(). Los adjuntos de la
 // administración se validan al guardar y otra vez al mostrarlos (cleanRec / ytUrl).
 
-const RCS={sec:"guias",via:"clientas",q:""}; // sec: guias | dia («Qué contestar cuando te dicen…» es su propia pantalla: objeciones.js)
+const RCS={sec:"guias",via:"clientas",q:"",tema:{clientas:"",proyecto:""},mo:{}}; // sec: guias | minis | dia («Qué contestar cuando te dicen…» es su propia pantalla: objeciones.js)
 const RCA={edit:null,pImg:null,pPdf:null,delId:null,pub:"",busy:false}; // estado de la administración de recursos
 
 // ----- utilidades comunes (las usan también negocio.js, perfil_ig.js y numeros.js) -----
@@ -1055,28 +1060,97 @@ const recTipo=r=>r.adjunto?r.adjunto.tipo:"texto";
 const rcFind=id=>teamRecs().find(r=>r.id===id)||null;
 
 // ----- LISTA -----
+// RCS.sec: guias | minis (las mini guías de las situaciones de Crear) | dia. RCS.tema: el tema elegido en cada camino («» = Todas).
+// RCS.mo: grupos de mini guías abiertos (se pintan al abrirlos: son 781 situaciones y no se pintan de golpe).
+const RC_LEAD="Lo que mandas cuando alguien comenta tu palabra clave: la guía, los mensajes para cada momento y la tarjeta para compartir.";
+const RC_LEAD_MINIS="Cada situación de Crear trae su mini guía. Aquí las tienes todas, por si quieres mandar una sin pasar por Crear.";
+const RC_MAX_BUSCA=8; // mini guías que salen debajo de las guías al buscar; el resto, con «Ver todas»
+const rcVia=v=>v==="clientas"?"clientas":"el proyecto";
+const rcNum=(n,u,p)=>n+" "+(n===1?u:p);
+// temas de un camino, en el orden de content/guias_temas.json, con cuántas guías tiene cada uno (un tema que no esté en la lista sale al final)
+function rcTemas(via){
+  const n={};DB.guias.forEach(g=>{if(g.via===via)n[g.tema]=(n[g.tema]||0)+1});
+  const o=((DB.guias_temas)||[]).filter(t=>n[t]);Object.keys(n).forEach(t=>{if(o.indexOf(t)<0)o.push(t)});
+  return o.map(t=>[t,n[t]]);
+}
+const rcTemaVale=(via,t)=>!t||rcTemas(via).some(x=>x[0]===t);
+// situaciones de un camino agrupadas como en el banco de Crear: [[grupo, [situaciones]]]
+function rcGrupos(via){
+  const idx={},L=[];
+  C2.PKS.forEach(s=>{if(s.via!==via)return;if(idx[s.grupo]===undefined){idx[s.grupo]=L.length;L.push([s.grupo,[]])}L[idx[s.grupo]][1].push(s)});
+  return L;
+}
+const rcSitHit=(s,q)=>!q||norm([s.nombre,(s.kw||[]).join(" "),s.recurso,s.grupo].join(" ")).includes(q);
+const rcSitItem=s=>'<button type="button" class="ritem rsit" data-rsm="'+esc(s.id)+'"><b>'+esc(s.nombre)+'</b><span class="rkw">Palabra: '+esc((s.kw||[])[0]||"")+'</span><small>Mandas: '+esc(s.recurso||"")+'</small></button>';
 function viewRecursos(){
   const sec=RCS.sec,chip=(attr,val,cur,txt)=>'<button class="chip'+(cur===val?" on":"")+'" '+attr+'="'+val+'">'+txt+'</button>';
-  let h='<section class="panel"><h2>Recursos para enviar</h2><p class="lead">Lo que mandas cuando alguien comenta tu palabra clave: la guía, los mensajes para cada momento y la tarjeta para compartir.</p>'
-   +'<div class="chips">'+chip("data-rsec","guias",sec,"Guías")+chip("data-act","qcir","","Qué contestar cuando te dicen…")+chip("data-rsec","dia",sec,"Mensajes del día a día")+'</div>';
+  let h='<section class="panel"><h2>Recursos para enviar</h2><p class="lead">'+(sec==="minis"?RC_LEAD_MINIS:RC_LEAD)+'</p>'
+   +'<div class="chips">'+chip("data-rsec","guias",sec,"Guías")+chip("data-rsec","minis",sec,"Mini guías de situaciones")+chip("data-act","qcir","","Qué contestar cuando te dicen…")+chip("data-rsec","dia",sec,"Mensajes del día a día")+'</div>';
   if(sec!=="dia")h+='<div class="chips rvias">'+chip("data-rvia","clientas",RCS.via,"Clientas")+chip("data-rvia","proyecto",RCS.via,"Proyecto")+'</div>';
-  h+='<label>Buscar<input id="rc_q" type="search" autocomplete="off" value="'+esc(RCS.q)+'" placeholder="'+(sec==="guias"?"Por título o palabra clave":"Escribe una palabra")+'"></label></section>';
+  if(sec==="guias"){
+    const via=RCS.via,tm=RCS.tema[via]||"",T=rcTemas(via),tot=T.reduce((a,x)=>a+x[1],0);
+    h+='<div class="rtemas'+(RCS.q.trim()?" off":"")+'" id="rc_temas" role="group" aria-label="Temas">'
+     +'<button type="button" class="chip'+(!tm?" on":"")+'" data-rtema="" aria-pressed="'+(!tm)+'">Todas <span class="rn">'+tot+'</span></button>'
+     +T.map(x=>'<button type="button" class="chip'+(tm===x[0]?" on":"")+'" data-rtema="'+esc(x[0])+'" aria-pressed="'+(tm===x[0])+'">'+esc(x[0])+' <span class="rn">'+x[1]+'</span></button>').join("")+'</div>';
+  }
+  h+='<label>Buscar<input id="rc_q" type="search" autocomplete="off" value="'+esc(RCS.q)+'" placeholder="'+(sec==="guias"?"Por título, palabra, tema o para quién":sec==="minis"?"Por situación o por palabra":"Escribe una palabra")+'"></label></section>';
   h+='<div id="rc_list">'+listaHtml()+'</div>';
   return h;
 }
 function listaHtml(){
   const q=norm(RCS.q.trim());
   if(RCS.sec==="dia")return diaHtml(q);
-  const hit=(...t)=>!q||norm(t.join(" ")).includes(q);
-  const eq=teamRecs().filter(r=>r.via===RCS.via&&hit(r.titulo,r.kw.join(" "),r.para));
-  const gs=DB.guias.filter(g=>g.via===RCS.via&&hit(g.titulo,(g.kw||[]).join(" "),g.para));
-  const item=(id,tag,titulo,kw,para,cls)=>'<button class="ritem'+(cls||"")+'" data-rg="'+esc(id)+'"><span class="rtag">'+esc(tag)+'</span><b>'+esc(titulo)+'</b>'+(kw?'<span class="rkw">Palabra clave: '+esc(kw)+'</span>':'')+(para?'<small>'+esc(para)+'</small>':'')+'</button>';
-  let h='<section class="panel rlist"><p class="mut rcount">'+(eq.length+gs.length)+(eq.length+gs.length===1?" recurso":" recursos")+' para '+(RCS.via==="clientas"?"clientas":"el proyecto")+'</p>';
-  h+=eq.map(r=>item(r.id,"Del equipo · "+TIPO_TAG[recTipo(r)],r.titulo,r.kw[0],r.para," eq")).join("");
-  h+=gs.map(g=>item(g.id,g.amp?"Mini guía":"Guía + tarjeta",g.titulo,(g.kw||[])[0],g.para)).join("");
-  if(!eq.length&&!gs.length)h+=VIS.sinRes('No hay nada con esa palabra. Prueba con otra.',"rc_q");
+  if(RCS.sec==="minis")return minisHtml(q);
+  return guiasHtml(q);
+}
+function guiasHtml(q){
+  const via=RCS.via,tema=q?"":(RCS.tema[via]||""),hit=(...t)=>norm(t.join(" ")).includes(q);
+  const item=(id,tag,titulo,kw,para,cls)=>'<button class="ritem'+(cls||"")+'" data-rg="'+esc(id)+'"><span class="rtag">'+esc(tag)+'</span><b>'+esc(titulo)+'</b>'+(kw?'<span class="rkw">Palabra: '+esc(kw)+'</span>':'')+(para?'<small>'+esc(para)+'</small>':'')+'</button>';
+  const gItem=g=>item(g.id,g.amp?"Mini guía":"Guía + tarjeta",g.titulo,(g.kw||[])[0],g.para);
+  const orden=rcTemas(via).map(x=>x[0]);
+  // con texto en el buscador se ignora el tema y se busca en todas las del camino
+  const eq=tema?[]:teamRecs().filter(r=>r.via===via&&(!q||hit(r.titulo,r.kw.join(" "),r.para)));
+  const gs=DB.guias.filter(g=>g.via===via&&(q?hit(g.titulo,(g.kw||[]).join(" "),g.para,g.tema):(!tema||g.tema===tema)));
+  const eqItem=r=>item(r.id,"Del equipo · "+TIPO_TAG[recTipo(r)],r.titulo,r.kw[0],r.para," eq");
+  let h='<section class="panel rlist"><p class="mut rcount">'+rcNum(gs.length,"guía","guías")+(tema?' de «'+esc(tema)+'»':'')+' para '+rcVia(via)+(q?' con «'+esc(RCS.q.trim())+'»':'')+(eq.length?' y '+rcNum(eq.length,"recurso","recursos")+' del equipo':'')+'</p>';
+  h+=eq.map(eqItem).join("");
+  if(q){
+    // buscando: las guías por el orden de los temas, y debajo (con su título) las mini guías de situaciones que coinciden
+    const gq=gs.slice().sort((a,b)=>orden.indexOf(a.tema)-orden.indexOf(b.tema));
+    h+=(gq.length?'<h3 class="rtema">Guías <span class="rn">'+gq.length+'</span></h3>'+gq.map(gItem).join(""):"");
+    const S2=C2.PKS.filter(s=>s.via===via&&rcSitHit(s,q));
+    if(S2.length){
+      h+='<h3 class="rtema">Mini guías de situaciones <span class="rn">'+S2.length+'</span></h3>'+S2.slice(0,RC_MAX_BUSCA).map(rcSitItem).join("");
+      if(S2.length>RC_MAX_BUSCA)h+='<div class="acts"><button type="button" class="btn ghost" data-rsec="minis" data-rkeepq="1">Ver las '+S2.length+' mini guías</button></div>';
+    }
+    if(!gs.length&&!eq.length&&!S2.length)h+=VIS.sinRes('No hay nada con esa palabra. Prueba con otra.',"rc_q");
+  }else if(tema){
+    h+=gs.map(gItem).join("");
+  }else{
+    // «Todas»: agrupadas bajo el título de cada tema
+    orden.forEach(t=>{const L=gs.filter(g=>g.tema===t);if(L.length)h+='<h3 class="rtema">'+esc(t)+' <span class="rn">'+L.length+'</span></h3>'+L.map(gItem).join("")});
+    if(!gs.length&&!eq.length)h+=VIS.sinRes('Todavía no hay guías en este camino.',"rc_q");
+  }
   return h+'</section>';
 }
+// grupos de situaciones de un camino que tienen algo con esa búsqueda: [[grupo, situaciones que coinciden]]
+const rcGruposQ=q=>rcGrupos(RCS.via).map(([g,L])=>[g,L.filter(s=>rcSitHit(s,q))]).filter(x=>x[1].length);
+const rcMoKey=g=>RCS.via+"|"+g;
+function minisHtml(q){
+  const G=rcGruposQ(q),tot=G.reduce((a,x)=>a+x[1].length,0),auto=!!q&&tot<=30; // con pocas coincidencias salen ya abiertos
+  let h='<section class="panel rlist"><p class="mut rcount">'+rcNum(tot,"mini guía","mini guías")+' de situaciones para '+rcVia(RCS.via)+(q?' con «'+esc(RCS.q.trim())+'»':'')+'</p>';
+  h+=G.map(([g,L])=>{const ab=auto||!!RCS.mo[rcMoKey(g)];
+    return '<details class="rdet rgrp" data-rgrp="'+esc(g)+'"'+(ab?" open":"")+'><summary><span>'+esc(g)+' <span class="rn">'+L.length+'</span></span></summary><div class="rdb">'+(ab?L.map(rcSitItem).join(""):"")+'</div></details>'}).join("");
+  if(!G.length)h+=VIS.sinRes('No hay ninguna situación con esa palabra. Prueba con otra.',"rc_q");
+  return h+'</section>';
+}
+// un grupo se abre: solo entonces se pintan sus situaciones
+document.addEventListener("toggle",e=>{
+  const d=e.target;if(!d||!d.classList||!d.classList.contains("rgrp"))return;
+  const g=d.dataset.rgrp;if(d.open)RCS.mo[rcMoKey(g)]=1;else delete RCS.mo[rcMoKey(g)];
+  const b=d.querySelector(".rdb");
+  if(d.open&&b&&!b.firstChild){const q=norm(RCS.q.trim()),x=rcGrupos(RCS.via).find(y=>y[0]===g);if(x)b.innerHTML=x[1].filter(s=>rcSitHit(s,q)).map(rcSitItem).join("")}
+},true);
 const CONV_TXT={reaccion_emoji:"Te responde con un emoji a una story",respuesta_encuesta:"Contesta a tu encuesta o caja de preguntas",le_gusto_producto:"Le ha gustado un producto",reactivar:"Reactivar a alguien que dejó de escribir",postventa:"Después de un pedido",pregunta_precio:"Te pregunta el precio",me_lo_pienso:"Te dice «me lo pienso»",curiosidad_proyecto:"Tiene curiosidad por el proyecto",tras_zoom:"Después de un Zoom",no_al_proyecto:"Te dice que no al proyecto",agradecer:"Dar las gracias",permiso_testimonio:"Pedir permiso para compartir su opinión"};
 function diaHtml(q){
   const C=(DB.frases&&DB.frases.conversacion)||{};
@@ -1098,7 +1172,7 @@ function viewGuiaDet(){
   const g=GUIA[S.guia];
   if(!g){const r=rcFind(S.guia);return r?viewRecEquipo(r):'<section class="panel"><h2>No encuentro ese recurso</h2><p class="lead">Vuelve a la lista y elige otro.</p></section>'}
   const kit=g.kit||{},proy=g.via==="proyecto";
-  let h='<section class="panel rhead"><span class="rtag">'+(proy?"Proyecto":"Clientas")+'</span><h2>'+esc(g.titulo)+'</h2><p class="lead">'+esc(g.para||"")+'</p><div class="kws">'+(g.kw||[]).map(k=>'<span class="chip on rkwc">'+esc(k)+'</span>').join("")+'</div><p class="note">Estas palabras activan este recurso. Elige la que hayas pedido en tu reel o story.</p></section>';
+  let h='<section class="panel rhead"><span class="rtag">'+(proy?"Proyecto":"Clientas")+'</span><h2>'+esc(g.titulo)+'</h2><p class="lead">'+esc(g.para||"")+'</p><div class="kws">'+(g.kw||[]).map(k=>'<span class="chip on rkwc">'+esc(k)+'</span>').join("")+'</div><p class="note">Esta es la palabra de la guía. Si en tu publicación pediste otra, mándala igual: lo que cuenta es la guía.</p></section>';
   if(isNutri(g))h+='<div class="aviso">'+esc(REC_AVISO_NUTRI())+'</div>';
   h+=rcStep(1,"Mensaje de entrega","Lo primero que envías por mensaje privado de Instagram, con la guía.",(kit.entrega||[]).map((t,i)=>rcMsg(t,i+1,"","g:"+g.id)).join(""));
   const lineas=String(g.texto||"").split("\n").map(l=>l.trim()?esc(l):"<br>").join("<br>").replace(/(<br>){3,}/g,"<br><br>");
@@ -1118,6 +1192,22 @@ function viewGuiaDet(){
   }
   return h;
 }
+// ----- FICHA de una mini guía de situación (la misma que ofrece Crear, para mandarla sin pasar por Crear) -----
+function viewSitMini(){
+  const s=C2.PK[S.rsm];
+  if(!s)return '<section class="panel"><h2>No encuentro esa situación</h2><p class="lead">Vuelve a la lista y elige otra.</p></section>';
+  const G=s.pk.guia,mg=mgSit(s),mini=!!(mg&&mgOk(mg));
+  let h='<section class="panel rhead"><span class="rtag">Mini guía · '+(s.via==="proyecto"?"Proyecto":"Clientas")+'</span><h2>'+esc(s.nombre)+'</h2><p class="lead">Mandas: '+esc(s.recurso||s.pk.recurso_corto||"")+'</p>'
+   +'<div class="kws">'+(s.kw||[]).slice(0,1).map(k=>'<span class="chip on rkwc">'+esc(k)+'</span>').join("")+'</div>'
+   +'<p class="note">Situación del grupo «'+esc(s.grupo)+'».</p><div class="acts"><button type="button" class="btn" data-rscrear="'+esc(s.id)+'">Abrir esta situación en Crear</button></div></section>';
+  h+=rcStep(1,"Mensaje de entrega","Lo primero que envías por mensaje privado de Instagram, con la guía.",rcMsg(G.entrega,1,"","pk:"+s.id));
+  h+=rcStep(2,"El material",mini?"La mini guía para compartir o guardar como PDF y el texto para pegar en el chat.":"La guía para pegar en el chat y la tarjeta para compartir como imagen.",
+    (mini?mgBloque(mg):tjBloque("pk:"+s.id))
+    +'<details class="c2dd rdet"><summary><b>O solo el texto, por si prefieres mandarlo escrito</b></summary><div class="rtext"><div class="rmh"><span class="rver">Texto de la guía</span>'+rcCopy(G.texto||"","","pk:"+s.id)+'</div><div class="rbody">'+String(G.texto||"").split("\n").map(l=>l.trim()?esc(l):"<br>").join("<br>").replace(/(<br>){3,}/g,"<br><br>")+'</div></div></details>');
+  h+=rcStep(3,"Seguimiento a los 2-3 días","Si no te ha contestado, un recordatorio sin presión.",rcMsg(G.seguimiento,1));
+  return h+'<section class="panel"><div class="acts"><button type="button" class="btn ghost" data-rscrear="'+esc(s.id)+'">Abrir esta situación en Crear</button></div></section>';
+}
+VIEWS.sit_mini=viewSitMini;
 function viewRecEquipo(r){
   const t=recTipo(r),a=r.adjunto;
   let n=0,h='<section class="panel rhead"><span class="rtag">Del equipo · '+TIPO_TAG[t]+'</span><h2>'+esc(r.titulo)+'</h2>'+(r.para?'<p class="lead">'+esc(r.para)+'</p>':'')+'<div class="kws">'+r.kw.map(k=>'<span class="chip on rkwc">'+esc(k)+'</span>').join("")+'</div></section>';
@@ -1471,9 +1561,12 @@ async function raPublicar(){
 document.addEventListener("click",e=>{
   const t=e.target.closest("button");if(!t)return;const d=t.dataset;
   if(d.rc!==undefined){copy(d.rc);return}
-  if(d.rsec){RCS.sec=d.rsec;RCS.q="";render(true);return}
+  if(d.rsec){RCS.sec=d.rsec;if(!d.rkeepq)RCS.q="";render(true);if(d.rkeepq)window.scrollTo(0,0);return}
   if(d.rvia){RCS.via=d.rvia;render(true);return}
-  if(d.rg){S.guia=d.rg;go("guia_det");return}
+  if(d.rtema!==undefined){RCS.tema[RCS.via]=d.rtema;RCS.q="";render(true);return} // elegir un tema deja el buscador en blanco
+  if(d.rg){S.guia=guiaId(d.rg);go("guia_det");return}
+  if(d.rsm){S.rsm=d.rsm;go("sit_mini");return}
+  if(d.rscrear){const s=C2.PK[d.rscrear];if(s)C2.abrir(C2.st().t,s.via,C2.vale(s,C2.st().o)?C2.st().o:(s.objetivos.indexOf("escriban")>=0?"escriban":s.objetivos[0]),s.id);return}
   if(tjClick(t))return;
   if(d.rpdf){abrirPdf(rcFind(d.rpdf));return}
   switch(d.ra){
@@ -1494,7 +1587,7 @@ document.addEventListener("change",e=>{
 });
 document.addEventListener("input",e=>{
   if(e.target.classList&&e.target.classList.contains("tjuser")){tjUsuario(e.target);return}
-  if(e.target.id==="rc_q"){RCS.q=e.target.value;const l=document.getElementById("rc_list");if(l)l.innerHTML=listaHtml()}
+  if(e.target.id==="rc_q"){RCS.q=e.target.value;const l=document.getElementById("rc_list");if(l)l.innerHTML=listaHtml();const tm=document.getElementById("rc_temas");if(tm)tm.classList.toggle("off",!!RCS.q.trim())}
 });
 
 // ===== Fam Studio · Mini guía: la guía de Recursos maquetada como una pequeña revista (canvas 1080 x 1350 por página) =====
@@ -2385,7 +2478,7 @@ const BIO_LLAMADAS=[["palabra","Que me escriban una palabra"],["destacadas","Que
 // cada línea de una bio: [grupo de frases, desplazamiento respecto a la versión actual]
 const BIO_EST={A:[["quien",0],["hablo",0],["llamada",0]],B:[["para_quien",0],["encontrar",0],["llamada",1]],C:[["pregunta",0],["hablo",2],["llamada",2]],D:[["trio",0],["llamada",3]],E:[["frase",0],["llamada",0]],F_proy:[["proyecto",0],["encontrar",1],["llamada",2]],F_cli:[["para_quien_f",0],["encontrar",2],["llamada",3]]};
 const BIO_EXCL={cuarenta:"veinte",veinte:"cuarenta",trabajo:"belleza",belleza:"trabajo"};
-const PIG={zt:null,a:null,ok:null,vs:[0,0,0,0,0,0],pv:[0,0,0,0,0,0],edit:false,emo:false,red:"ig",tv:0,rv:null};
+const PIG={zt:null,a:null,ok:null,vs:[0,0,0,0,0,0],pv:[0,0,0,0,0,0],edit:false,emo:false,red:"ig",tv:0,rv:null,ci:0};
 const PRE_MAX={texto:70,foto:90,desc:350};
 
 const bioTemas=q=>q==="proyecto"?BIO_TEMAS_P:q?BIO_TEMAS_C:[];
@@ -2410,9 +2503,16 @@ function bioInit(){
   if(PIG.a)return;
   PIG.a=bioSane(ls("fs_bio_r"));
   PIG.emo=ls("fs_bio_emo")===1;
-  const k=ls("fs_bio_ok");
-  PIG.ok=k&&typeof k.txt==="string"&&k.txt.length&&k.txt.length<=BIO_MAX?{txt:k.txt,est:String(k.est||"").slice(0,1)}:null;
+  PIG.ok=bioOk(ls("fs_bio_ok"));
 }
+// la bio elegida guarda sus dos versiones (sin y con emojis); las guardadas antes solo traían una: la otra se saca de ella
+function bioOk(k){
+  if(!k||typeof k.txt!=="string"||!k.txt.length||k.txt.length>BIO_MAX+8)return null;
+  const e=bioTieneEmo(k.txt),v=x=>typeof x==="string"&&x.length&&x.length<=BIO_MAX+8;
+  const sin=v(k.sin)?k.sin:(e?bioSinEmo(k.txt):k.txt);
+  return {txt:k.txt,sin:sin,con:v(k.con)?k.con:(e?k.txt:bioConEmo(sin)),est:String(k.est||"").slice(0,1)};
+}
+const bioOkTxt=()=>PIG.emo?PIG.ok.con:PIG.ok.sin;
 const bioSave=()=>ls("fs_bio_r",PIG.a);
 const bioDone=a=>!!(a.quien&&a.tema&&a.rasgos.length&&a.tono&&a.llamada&&(a.llamada!=="palabra"||a.palabra.length>=2));
 
@@ -2447,7 +2547,8 @@ function bioSeis(r){
   const f=r.quien==="clientas"?"F_cli":"F_proy";
   return [["A","A"],["B","B"],["C","C"],["D","D"],["E","E"],["F",f]].map((x,i)=>{
     const L=bioCiuLineas(bioLineas(r,PIG.vs[i],x[1]),x[0],r.ciudad);
-    return {l:x[0],txt:PIG.emo?bioEmoAplica(r,L,BIO_MAX):L.map(y=>y.t).join("\n")};
+    const sin=L.map(y=>y.t).join("\n"),con=bioEmoAplica(r,L,BIO_MAX); // las dos versiones de cada opción: la que se ve la decide el interruptor (PIG.emo)
+    return {l:x[0],sin:sin,con:con,txt:PIG.emo?con:sin};
   });
 }
 
@@ -2473,11 +2574,19 @@ function bioEmoCands(r,l){
   return c.concat(BIO_EMO_TEMA[r.tema]||[],BIO_EMO_GEN);
 }
 // un emoji por línea, nunca dos iguales; si no cabe en el límite (contando como Instagram, que cuenta cada emoji por sus dos unidades), se quita el de la línea más larga
+// Instagram cuenta cada emoji por dos caracteres, también los que en JavaScript miden uno (☕, ⏰…): se cuenta así para no pasarse nunca
+const bioLen=t=>String(t||"").replace(/\p{Extended_Pictographic}/gu,"..").length;
+const bioTieneEmo=t=>/\p{Extended_Pictographic}/u.test(String(t||""));
+const bioSinEmo=t=>String(t||"").replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu,"").replace(/[ \t]+/g," ").replace(/ ?\n ?/g,"\n").replace(/^ +| +$/gm,"").trim();
+function bioConEmo(sin){ // la versión con emojis de un texto ya hecho (bios guardadas antes de que se guardasen las dos)
+  const L=String(sin||"").split("\n").map((t,i,a)=>({g:i===a.length-1&&a.length>1?"llamada":"",t:t}));
+  return bioEmoAplica(PIG.a||bioSane(null),L,BIO_MAX);
+}
 function bioEmoAplica(r,lins,max){
   const used=[],L=lins.map(l=>{const c=bioEmoCands(r,l);let e="";for(let i=0;i<c.length;i++)if(used.indexOf(c[i])<0){e=c[i];break}used.push(e);return {e:e,t:l.t}});
   const join=()=>L.map(x=>x.e?x.e+" "+x.t:x.t).join("\n");
   let t=join();
-  while(t.length>max){let k=-1;L.forEach((x,i)=>{if(x.e&&(k<0||x.t.length>L[k].t.length))k=i});if(k<0)break;L[k].e="";t=join()}
+  while(bioLen(t)>max){let k=-1;L.forEach((x,i)=>{if(x.e&&(k<0||x.t.length>L[k].t.length))k=i});if(k<0)break;L[k].e="";t=join()}
   return t;
 }
 
@@ -2504,18 +2613,58 @@ function bioTT(r,v,emo){
 }
 const bioNom=()=>(PIG.a.nombre||"").trim()||"Tu nombre";
 
-// ----- piezas de pantalla -----
-const bioCnt=(t,m)=>'<span class="bio-cnt">'+t.length+' de '+(m||BIO_MAX)+'</span>';
-function bioMock(txt){
-  return '<div class="bio-mock"><div class="bio-ph"><span class="bio-pf" aria-hidden="true"></span><div class="bio-pn"><b>'+esc(bioNom())+'</b><small>Perfil de ejemplo</small></div></div><p class="bio-tx">'+esc(txt).replace(/\n/g,"<br>")+'</p></div>';
+// ----- maqueta del perfil: un perfil de Instagram (o de TikTok) dibujado con HTML y CSS, con los datos de la usuaria -----
+// Es una maqueta propia: sin logotipos, sin nombres de marca ni capturas. Se ve en claro, dentro de un marco de móvil.
+const bioCnt=(t,m)=>'<span class="bio-cnt">'+bioLen(t)+' de '+(m||BIO_MAX)+'</span>';
+const BIO_CAT={piel:"Cuidado de la piel",maquillaje:"Maquillaje",pelo:"Cuidado del pelo",nutri:"Recetas y nutrición",perfumes:"Perfumes y regalos",todo:"Belleza y bienestar",dia:"Creadora de contenido",redes:"Creadora de contenido",familia:"Familia y día a día",edad:"Creadora de contenido"};
+const BIO_TIPOS=["cafe_taza","lavabo_botes","regalo_caja","ventana_luz","productos_fila","comida_cocina","mesa_trabajo","calendario_pared"]; // fotos de ejemplo de objetos, sin caras
+const BIO_NUM={ig:[["36","Publicaciones"],["842","Seguidores"],["295","Seguidos"]],tt:[["128","Siguiendo"],["842","Seguidores"],["3.402","Me gusta"]]};
+const BIO_ENLACE="tu-enlace.es/hola";
+const bioIni=n=>{const m=String(n||"").match(/\p{L}/u);return m?m[0].toUpperCase():""};
+// los datos de la maqueta salen de las respuestas: el nombre de perfil es el primero que propone la pantalla, las destacadas son las de «Tus destacadas»
+function bioModelo(){
+  const B=DB.bio,a=PIG.a,nom=bioNom(),tema=a&&a.tema,propuesto=(B.nombres[tema]||[])[0];
+  const slug=bioN(a.nombre||"").replace(/[^a-z0-9]+/g,".").replace(/^\.+|\.+$/g,"").slice(0,20)||"tu.nombre";
+  return {nom:nom,ini:bioIni(a.nombre),perfil:propuesto?propuesto.split("{Nombre}").join(nom):nom,usuario:slug,cat:BIO_CAT[tema]||"",
+    dest:(B.destacadas[a.quien]||B.destacadas.ambas).slice(0,4).map(d=>d.n)};
 }
+function bioMiniaturas(i,n){
+  const C=(DB.fotos||{}).cats||{},T=BIO_TIPOS.filter(t=>C[t]);let h="";
+  for(let j=0;j<n;j++){const t=T.length?T[(i+j)%T.length]:"";h+='<span class="pm-th"'+(t?' data-ft="'+t+'" data-fh="'+((i*5+j*3)%C[t])+'"':'')+'></span>'}
+  return h;
+}
+function bioMock(txt,red,i){
+  const M=bioModelo(),tt=red==="tt",N=BIO_NUM[tt?"tt":"ig"];
+  const av='<span class="pm-av'+(M.ini?'':' pm-av0')+'" aria-hidden="true">'+(M.ini?esc(M.ini):'')+'</span>';
+  const sts='<div class="pm-sts">'+N.map(x=>'<span><b>'+x[0]+'</b><small>'+x[1]+'</small></span>').join("")+'</div>';
+  const bio='<p class="bio-tx pm-bio">'+esc(txt).replace(/\n/g,"<br>")+'</p><p class="pm-lnk">'+BIO_ENLACE+'</p>';
+  let h;
+  if(tt){
+    h='<div class="pm pm-tt"><div class="pm-top"><b class="pm-hd">'+esc(M.nom)+'</b></div>'+av+'<p class="pm-nm">@'+esc(M.usuario)+'</p>'+sts
+     +'<div class="pm-bt" aria-hidden="true"><span class="pm-pri">Seguir</span><span>Mensaje</span></div>'+bio
+     +'<div class="pm-tb" aria-hidden="true"><i class="on"></i><i></i><i></i></div><div class="pm-gr">'+bioMiniaturas(i||0,6)+'</div></div>';
+  }else{
+    h='<div class="pm pm-ig"><div class="pm-top"><b class="pm-hd">'+esc(M.usuario)+'</b><span class="pm-mn" aria-hidden="true"><i></i><i></i><i></i></span></div>'
+     +'<div class="pm-row">'+av+sts+'</div><p class="pm-nm">'+esc(M.perfil)+'</p>'+(M.cat?'<p class="pm-cat">'+esc(M.cat)+'</p>':'')+bio
+     +'<div class="pm-bt" aria-hidden="true"><span>Seguir</span><span>Mensaje</span></div>'
+     +'<div class="pm-hl">'+M.dest.map(d=>'<span class="pm-h"><i aria-hidden="true">'+esc(bioIni(d))+'</i><small>'+esc(d)+'</small></span>').join("")+'</div>'
+     +'<div class="pm-tb" aria-hidden="true"><i class="on"></i><i></i></div><div class="pm-gr">'+bioMiniaturas(i||0,6)+'</div></div>';
+  }
+  return '<div class="pm-w"><div class="pm-fr" role="group" aria-label="Así se vería tu perfil de '+(tt?'TikTok':'Instagram')+'">'+h+'</div></div>';
+}
+const bioBtnImg='<button type="button" class="mini" data-bk="img">Guardar imagen</button>';
 function bioCards(){
-  return bioSeis(PIG.a).map((b,i)=>'<article class="bio-card" aria-label="Opción '+b.l+'"><span class="bio-lt">Opción '+b.l+'</span>'+bioMock(b.txt)+'<div class="bio-ft">'+bioCnt(b.txt)+'</div>'
-   +'<div class="acts"><button type="button" class="mini" data-copy="'+esc(b.txt)+'">Copiar</button><button type="button" class="mini" data-bk="otra" data-bi="'+i+'">Otra versión</button><button type="button" class="mini bio-pri" data-bk="mia" data-bi="'+i+'">Esta es la mía</button></div></article>').join("");
+  const S=bioSeis(PIG.a),n=S.length,c=Math.min(Math.max(PIG.ci|0,0),n-1);
+  return '<div class="bio-car"><button type="button" class="bio-ar" data-bk="sl" data-bv="-1" aria-label="Opción anterior">&#8249;</button>'
+   +'<p class="bio-cl" aria-live="polite"><b id="bio_cl">Opción '+S[c].l+'</b><span id="bio_cn">'+(c+1)+' de '+n+' · desliza para ver más</span></p>'
+   +'<button type="button" class="bio-ar" data-bk="sl" data-bv="1" aria-label="Opción siguiente">&#8250;</button></div>'
+   +'<div class="bio-dots" id="bio_dots" aria-hidden="true">'+S.map((b,i)=>'<i'+(i===c?' class="on"':'')+'></i>').join("")+'</div>'
+   +'<div class="bio-trk" id="bio_tr">'+S.map((b,i)=>'<article class="bio-card" aria-label="Opción '+b.l+'"><span class="bio-lt bio-sr">Opción '+b.l+'</span>'+bioMock(b.txt,"ig",i)+'<div class="bio-ft">'+bioCnt(b.txt)+'</div>'+(b.con===b.sin?'<p class="note bio-sne">Esta opción es tan larga que con emojis pasaría de 150: sale igual en las dos versiones.</p>':'')
+   +'<div class="acts"><button type="button" class="mini" data-copy="'+esc(b.txt)+'">Copiar</button><button type="button" class="mini" data-bk="otra" data-bi="'+i+'">Otra versión</button><button type="button" class="mini bio-pri" data-bk="mia" data-bi="'+i+'">Esta es la mía</button>'+bioBtnImg+'</div></article>').join("")+'</div>';
 }
 function bioChosen(){
-  const k=PIG.ok;
-  return '<section class="panel bio-ok"><h2>Tu bio</h2>'+bioMock(k.txt)+'<div class="bio-ft">'+bioCnt(k.txt)+'</div><div class="acts"><button type="button" class="mini" data-copy="'+esc(k.txt)+'">Copiar</button>'
+  const t=bioOkTxt(),i=Math.max(0,"ABCDEF".indexOf(PIG.ok.est||"A"));
+  return '<section class="panel bio-ok"><h2>Tu bio</h2>'+(PIG.edit?'':bioEmoSw())+bioMock(t,"ig",i)+'<div class="bio-ft">'+bioCnt(t)+'</div><div class="acts"><button type="button" class="mini" data-copy="'+esc(t)+'">Copiar</button>'+bioBtnImg
    +(PIG.edit?'':'<button type="button" class="mini" data-bk="cambiar">Cambiar mis respuestas</button>')+'</div>'
    +(PIG.edit?'<p class="note">Seguirá siendo tu bio hasta que elijas otra.</p>':'')+'</section>';
 }
@@ -2536,9 +2685,9 @@ function bioForm(){
     q5+='<div class="bio-pal">'+(W.length?'<p class="mut">Te propongo estas. Pulsa una o escribe la tuya.</p><div class="bio-opts">'+W.map(w=>'<button type="button" class="chip bio-o'+(w===a.palabra?" on":"")+'" data-bk="pal" data-bv="'+esc(w)+'" aria-pressed="'+(w===a.palabra?"true":"false")+'">'+esc(w)+'</button>').join("")+'</div>':'<p class="mut">Elige antes de qué hablas y te propongo palabras. También puedes escribir la tuya.</p>')
      +'<label>Tu palabra<input id="bio_pal" type="text" maxlength="'+BIO_PAL_MAX+'" autocomplete="off" autocapitalize="characters" spellcheck="false" value="'+esc(a.palabra)+'" placeholder="Una sola palabra"><small>En mayúsculas y de '+BIO_PAL_MAX+' letras como máximo.</small></label></div>';
   }
-  h+=Q(5,"¿Qué quieres que hagan al llegar a tu perfil?","",q5);
+  h+=Q(5,"¿Qué quieres que hagan al llegar a tu perfil?","",q5)+'<div class="bio-gow">'+bioGoHtml()+'</div>';
   h+=Q(6,"¿De qué zona eres?","Es opcional y solo sale en la bio de Instagram. La gente pone su provincia o su zona, no su pueblo: busca la tuya y tócala, o escribe lo que prefieras.",'<label class="bio-ciu"><input id="bio_ciu" aria-label="Tu zona: provincia, isla o ciudad autónoma" type="text" enterkeyhint="search" maxlength="'+(BIO_CIU_MAX+4)+'" autocomplete="off" autocapitalize="words" value="'+esc(a.ciudad)+'" placeholder="Por ejemplo, Sevilla"></label><div id="bz_box" class="bz-box">'+bioZonaHtml()+'</div><div class="bio-opts"><button type="button" class="chip bio-o'+(a.sinc?" on":"")+'" data-bk="sinc" aria-pressed="'+(a.sinc?"true":"false")+'">Prefiero no ponerlo</button></div><small class="mut" id="bio_ciuw" role="status"></small>');
-  h+='<div class="bio-q"><label>Tu nombre (opcional)<input id="bio_nom" type="text" maxlength="'+BIO_NOM_MAX+'" autocomplete="given-name" value="'+esc(a.nombre)+'" placeholder="Por ejemplo, Laura"><small>Sirve para el nombre del perfil.</small></label></div>';
+  h+='<div class="bio-q"><label>Tu nombre (opcional)<input id="bio_nom" type="text" maxlength="'+BIO_NOM_MAX+'" autocomplete="given-name" value="'+esc(a.nombre)+'" placeholder="Por ejemplo, Laura"><small>Sirve para el nombre del perfil.</small></label></div><div class="bio-gow">'+bioGoHtml()+'</div>';
   return h+'</section>';
 }
 // ----- publicación de presentación (banco: content/presentacion.json, DB.presentacion) -----
@@ -2611,17 +2760,20 @@ function bioBlocks(){
   h+='<details class="rdet"><summary>Cómo se cambia en Instagram</summary><div class="rdb"><ol class="rres">'+B.pasos.map(p=>'<li>'+esc(p)+'</li>').join("")+'</ol></div></details>';
   return h;
 }
-// interruptores del resultado: Instagram | TikTok (solo mientras elige) y Sin emojis | Con emojis (vale para las dos)
-function bioCtl(tabs,sel){
-  const b=(k,v,l,on)=>'<button type="button" class="bio-sg'+(on?" on":"")+'" data-bk="'+k+'" data-bv="'+v+'" aria-pressed="'+(on?"true":"false")+'">'+l+'</button>';
-  return '<div class="bio-ctl">'+(tabs?'<div class="bio-seg" role="group" aria-label="Red social">'+b("red","ig","Instagram",sel==="ig")+b("red","tt","TikTok",sel==="tt")+'</div>':'')
-   +'<div class="bio-seg" role="group" aria-label="Emojis">'+b("emo","0","Sin emojis",!PIG.emo)+b("emo","1","Con emojis",PIG.emo)+'</div></div>'
-   +(PIG.emo?'<p class="note">Los emojis cuentan para el límite de caracteres. Si una bio no cabe con ellos, se quita el de la línea más larga.</p>':'');
+// interruptores del resultado: Instagram | TikTok (solo mientras elige) y Sin emojis | Con emojis (vale para las dos; sale una sola vez en la pantalla, siempre encima de la maqueta)
+const bioSg=(k,v,l,on)=>'<button type="button" class="bio-sg'+(on?" on":"")+'" data-bk="'+k+'" data-bv="'+v+'" aria-pressed="'+(on?"true":"false")+'">'+l+'</button>';
+const bioEmoSw=()=>'<div class="bio-ctl bio-ctl1"><div class="bio-seg" role="group" aria-label="Emojis">'+bioSg("emo","0","Sin emojis",!PIG.emo)+bioSg("emo","1","Con emojis",PIG.emo)+'</div></div>'
+  +(PIG.emo?'<p class="note">Los emojis cuentan para el límite de caracteres. Si una bio no cabe con ellos, se quita el de la línea más larga.</p>':'');
+function bioCtl(tabs,sel,emo){
+  if(!tabs&&!emo)return "";
+  return '<div class="bio-ctl">'+(tabs?'<div class="bio-seg" role="group" aria-label="Red social">'+bioSg("red","ig","Instagram",sel==="ig")+bioSg("red","tt","TikTok",sel==="tt")+'</div>':'')
+   +(emo?'<div class="bio-seg" role="group" aria-label="Emojis">'+bioSg("emo","0","Sin emojis",!PIG.emo)+bioSg("emo","1","Con emojis",PIG.emo)+'</div>':'')+'</div>'
+   +(emo&&PIG.emo?'<p class="note">Los emojis cuentan para el límite de caracteres. Si una bio no cabe con ellos, se quita el de la línea más larga.</p>':'');
 }
 function bioTTCard(){
   const t=bioTT(PIG.a,PIG.tv,PIG.emo);
-  return '<article class="bio-tt" aria-label="Bio para TikTok"><span class="bio-lt">Para TikTok</span>'+bioMock(t)+'<div class="bio-ft">'+bioCnt(t,BIO_TT_MAX)+'</div>'
-   +'<div class="acts"><button type="button" class="mini" data-copy="'+esc(t)+'">Copiar bio</button><button type="button" class="mini" data-bk="tto">Otra versión</button></div>'
+  return '<article class="bio-tt" aria-label="Bio para TikTok"><span class="bio-lt">Para TikTok</span>'+bioMock(t,"tt",PIG.tv)+'<div class="bio-ft">'+bioCnt(t,BIO_TT_MAX)+'</div>'
+   +'<div class="acts"><button type="button" class="mini" data-copy="'+esc(t)+'">Copiar bio</button><button type="button" class="mini" data-bk="tto">Otra versión</button>'+bioBtnImg+'</div>'
    +'<p class="note">'+esc(DB.bio.tiktok.nota)+'</p></article>';
 }
 function bioResHtml(){
@@ -2630,8 +2782,10 @@ function bioResHtml(){
   const bios=!PIG.ok||PIG.edit,sel=bios?PIG.red:"tt";
   return '<section class="panel" id="bio_res"><h3>'+(bios&&sel==="ig"?'Tus seis bios':'Tu bio para TikTok')+'</h3><p class="lead">'
    +(sel==="tt"?'Es la misma bio en corto: 80 caracteres y dos líneas como mucho.':'Elige la que más se parezca a ti. Con «Otra versión» cambian las frases y, al pegarla, puedes retocar lo que quieras.')+'</p>'
-   +bioCtl(bios,sel)+'<div id="bio_out">'+(sel==="tt"?bioTTCard():bioCards())+'</div></section>'+bioBlocks();
+   +bioCtl(bios,sel,bios)+'<div id="bio_out">'+(sel==="tt"?bioTTCard():bioCards())+'</div></section>'+bioBlocks();
 }
+// botón «Ya están tus bios · Verlas»: sale en cuanto las respuestas están completas, para no tener que buscarlas más abajo
+const bioGoHtml=()=>bioDone(PIG.a)&&(!PIG.ok||PIG.edit)?'<button type="button" class="mini bio-pri bio-go" data-bk="ver">Ya están tus bios · Verlas</button>':"";
 
 // ----- «Revisa tu bio actual»: revisión por reglas de una bio pegada (no se guarda en ningún sitio) -----
 const BIO_RE_TEMA=/piel|maquill|\bpelo\b|cabello|receta|nutri|sabor|perfum|regalo|rutina|belleza|\bcuid|truco|consejo|cosmetic|skincare|labios|\bcara\b|esteti|peluquer|proyecto|redes|\bayudo|para ti|para quien|\bhablo de|comparto|encontraras|\bcocin|neceser|look\b/;
@@ -2740,15 +2894,145 @@ function bioMas(){
 function viewPerfilIG(){
   bioInit();
   let h="";
-  if(PIG.ok)h+=bioChosen();
+  if(PIG.ok)h+='<div id="bio_okbox">'+bioChosen()+'</div>';
   else h+='<section class="panel"><h2>Tu bio de Instagram</h2><p class="lead">Tu bio es lo primero que lee quien llega por un reel. Tiene que decir quién eres, de qué hablas y qué hacer ahora, en 150 caracteres.</p></section>';
   h+='<section class="panel bio-rv" id="bio_rv">'+bioRevHtml()+'</section>';
   if(!PIG.ok||PIG.edit)h+=bioForm();
+  setTimeout(bioPos,0); // la maqueta que se estaba viendo vuelve a su sitio
   return h+'<div id="bio_resbox">'+bioResHtml()+'</div>'+bioMas();
 }
 
 // ----- eventos -----
-function bioRefresh(){const b=document.getElementById("bio_resbox");if(b){b.innerHTML=bioResHtml();if(typeof FOTOS!=="undefined")FOTOS.scan()}}
+function bioRefresh(){
+  const b=document.getElementById("bio_resbox");if(b)b.innerHTML=bioResHtml();
+  const k=document.getElementById("bio_okbox");if(k&&PIG.ok)k.innerHTML=bioChosen();
+  document.querySelectorAll(".bio-gow").forEach(g=>{g.innerHTML=bioGoHtml()});
+  bioPos();if(typeof FOTOS!=="undefined")FOTOS.scan();
+}
+// ----- carrusel de las seis opciones: se desliza con el dedo (scroll-snap) o con las flechas; PIG.ci es la opción que se ve -----
+const bioTr=()=>document.getElementById("bio_tr");
+function bioPos(){
+  const t=bioTr();if(!t||!t.clientWidth)return;
+  t.style.scrollBehavior="auto";t.scrollLeft=PIG.ci*t.clientWidth;t.style.scrollBehavior="";
+  bioCar();
+}
+function bioCar(){
+  const l=document.getElementById("bio_cl"),n=document.getElementById("bio_cn"),d=document.getElementById("bio_dots");if(!l)return;
+  l.textContent="Opción "+"ABCDEF".charAt(PIG.ci);n.textContent=(PIG.ci+1)+" de 6 · desliza para ver más";
+  if(d)Array.prototype.forEach.call(d.children,(x,i)=>x.classList.toggle("on",i===PIG.ci));
+}
+function bioIr(i){
+  const t=bioTr();if(!t)return;
+  i=(i+6)%6;PIG.ci=i;bioCar();
+  try{t.scrollTo({left:i*t.clientWidth,behavior:"smooth"})}catch(e){t.scrollLeft=i*t.clientWidth}
+}
+let bioTm=0;
+document.addEventListener("scroll",e=>{ // cuando la maqueta se para (no mientras se desliza, para no pisar el salto de las flechas) se apunta cuál se ve
+  const t=e.target;if(!t||t.id!=="bio_tr"||!t.clientWidth)return;
+  clearTimeout(bioTm);
+  bioTm=setTimeout(()=>{const i=Math.min(5,Math.max(0,Math.round(t.scrollLeft/t.clientWidth)));if(i!==PIG.ci){PIG.ci=i;bioCar()}},80);
+},true);
+// ----- «Guardar imagen»: la maqueta se dibuja en un canvas (sin librerías) y se comparte o se descarga como PNG -----
+const BIO_FUENTE='-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+function bioLineasCv(c,t,w){
+  const out=[];
+  String(t).split("\n").forEach(par=>{let l="";par.split(" ").forEach(p=>{const k=l?l+" "+p:p;if(l&&c.measureText(k).width>w){out.push(l);l=p}else l=k});out.push(l)});
+  return out;
+}
+function bioRR(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+// dibuja la maqueta en unidades de 360 de ancho; con «seco» solo mide (devuelve el alto)
+function bioDibuja(c,tt,txt,M,imgs,seco){
+  const W=360,m=16,x0=m+3,pw=W-2*m-6,pad=12,cw=pw-2*pad,L=x0+pad,F=n=>n+"px "+BIO_FUENTE;
+  const INK="#262626",GR="#737373",LK="#0b4f9c";
+  let y=m+3;
+  const fin=()=>y;
+  const t=(s,x,yy,font,col,al)=>{c.font=font;c.fillStyle=col;c.textAlign=al||"left";c.textBaseline="alphabetic";if(!seco)c.fillText(s,x,yy)};
+  // barra de arriba
+  y+=24;
+  if(tt){t(M.nom,W/2,y,"700 15px "+BIO_FUENTE,INK,"center")}
+  else{t(M.usuario,L,y,"700 17px "+BIO_FUENTE,INK);if(!seco){c.fillStyle=INK;for(let k=0;k<3;k++)c.fillRect(x0+pw-pad-18,y-14+k*6,18,2.4)}}
+  y+=14;
+  const num=BIO_NUM[tt?"tt":"ig"];
+  const av=(cx,cy,r)=>{if(seco)return;c.beginPath();c.arc(cx,cy,r+3,0,7);c.fillStyle="#fff";c.fill();c.beginPath();c.arc(cx,cy,r+3,0,7);c.strokeStyle="#D9C7A8";c.lineWidth=1.6;c.stroke();
+    const g=c.createLinearGradient(cx-r,cy-r,cx+r,cy+r);g.addColorStop(0,"#8a7262");g.addColorStop(1,"#614a3e");c.beginPath();c.arc(cx,cy,r,0,7);c.fillStyle=g;c.fill();
+    c.fillStyle="#EBDDC5";
+    if(M.ini){c.font="700 "+Math.round(r*.95)+"px "+BIO_FUENTE;c.textAlign="center";c.textBaseline="middle";c.fillText(M.ini,cx,cy+1)}
+    else{c.beginPath();c.arc(cx,cy-r*.2,r*.3,0,7);c.fill();c.beginPath();c.ellipse(cx,cy+r*.85,r*.62,r*.5,0,Math.PI,0);c.fill()}};
+  const stats=(xa,xb,yy)=>{
+    c.font="700 16px "+BIO_FUENTE;const wn=num.map(n=>c.measureText(n[0]).width);
+    c.font="13px "+BIO_FUENTE;const wl=num.map(n=>c.measureText(n[1]).width),ww=num.map((n,i)=>Math.max(wn[i],wl[i])),tot=ww.reduce((a,b)=>a+b,0),gap=Math.max(2,(xb-xa-tot)/(num.length-1));
+    let x=xa;num.forEach((n,i)=>{const cx=x+ww[i]/2;t(n[0],cx,yy,"700 16px "+BIO_FUENTE,INK,"center");t(n[1],cx,yy+17,"13px "+BIO_FUENTE,tt?GR:INK,"center");x+=ww[i]+gap});
+  };
+  const btn=(x,yy,w,h,s,pri)=>{if(!seco){bioRR(c,x,yy,w,h,8);c.fillStyle=pri?"#614a3e":"#efefef";c.fill()}t(s,x+w/2,yy+h/2+5,"700 13px "+BIO_FUENTE,pri?"#EBDDC5":INK,"center")};
+  const bio=(al)=>{
+    c.font=F(14);const ls=bioLineasCv(c,txt,cw);
+    ls.forEach(l=>{t(l,al==="center"?W/2:L,y,F(14),INK,al);y+=19});
+    y+=3;t(BIO_ENLACE,al==="center"?W/2:L,y,"600 14px "+BIO_FUENTE,LK,al);y+=12;
+  };
+  const pest=yy=>{ // fila de pestañas de la cuadrícula: raya, marca de la activa y dos iconos
+    if(seco)return;
+    c.fillStyle="#dbdbdb";c.fillRect(x0,yy,pw,1);c.fillStyle=INK;c.fillRect(x0,yy,tt?pw/3:pw/2,2);
+    const n=tt?3:2;for(let k=0;k<n;k++){c.lineWidth=2;c.strokeStyle=k?"#8e8e8e":INK;c.strokeRect(x0+pw/n*k+pw/n/2-6,yy+11,12,12)}
+  };
+  const th=(x,yy,w,h,k)=>{
+    if(seco)return;
+    const el=imgs[k],tonos=["#d9c7a8","#c7b08f","#e3d3b8","#b9a08c","#ceb99b","#dccdb4"];
+    c.save();c.beginPath();c.rect(x,yy,w,h);c.clip();
+    if(el&&el.complete&&el.naturalWidth){const r=Math.max(w/el.naturalWidth,h/el.naturalHeight),dw=el.naturalWidth*r,dh=el.naturalHeight*r;c.drawImage(el,x+(w-dw)/2,yy+(h-dh)/2,dw,dh)}
+    else{c.fillStyle=tonos[k%6];c.fillRect(x,yy,w,h)}
+    c.restore();
+  };
+  if(tt){
+    y+=6;av(W/2,y+42,42);y+=106;
+    t("@"+M.usuario,W/2,y,"700 16px "+BIO_FUENTE,INK,"center");y+=28;
+    stats(L+26,L+cw-26,y);y+=34;
+    const bw=(cw-70)/2;btn(L+16,y,bw+20,34,"Seguir",true);btn(L+16+bw+28,y,bw+6,34,"Mensaje",false);y+=34+14;
+    y+=10;bio("center");y+=6;
+    pest(y);y+=34;
+  }else{
+    y+=8;av(L+33,y+33,30);stats(L+72,L+cw,y+26);y+=92;
+    c.font="700 14px "+BIO_FUENTE;bioLineasCv(c,M.perfil,cw).forEach(l=>{t(l,L,y,"700 14px "+BIO_FUENTE,INK);y+=19});
+    if(M.cat){t(M.cat,L,y,F(13),GR);y+=19}
+    y+=1;bio("left");
+    const bw=(cw-8)/2;btn(L,y,bw,32,"Seguir",false);btn(L+bw+8,y,bw,32,"Mensaje",false);y+=32+14;
+    const hw=cw/4;
+    M.dest.forEach((d,i)=>{
+      const cx=L+hw*i+hw/2;
+      if(!seco){c.beginPath();c.arc(cx,y+29,29,0,7);c.fillStyle="#fff";c.fill();c.strokeStyle="#D9C7A8";c.lineWidth=1.6;c.stroke();
+        c.beginPath();c.arc(cx,y+29,25,0,7);c.fillStyle="#EBDDC5";c.fill();c.fillStyle="#614a3e";c.font="700 20px "+BIO_FUENTE;c.textAlign="center";c.textBaseline="middle";c.fillText(bioIni(d),cx,y+30)}
+      c.font=F(13);bioLineasCv(c,d,hw-4).slice(0,2).forEach((l,k)=>t(l,cx,y+29+29+16+k*15,F(13),INK,"center"));
+    });
+    y+=29+29+16+15+10;
+    pest(y);y+=34;
+  }
+  // cuadrícula: dos filas de tres, la segunda cortada como en una pantalla de móvil
+  const g=2,s=(pw-2*g)/3,hh=tt?s*4/3:s;
+  for(let k=0;k<6;k++){const col=k%3,fila=k>=3?1:0;th(x0+col*(s+g),y+g+fila*(hh+g),s,fila?hh*.45:hh,k)}
+  y+=g+hh+g+hh*.45;
+  return y;
+}
+async function bioGuardaImg(btn){
+  const box=btn.closest("article,section"),pm=box&&box.querySelector(".pm"),cp=box&&box.querySelector("[data-copy]");
+  if(!pm||!cp){toast("No se pudo guardar la imagen");return}
+  const tt=pm.classList.contains("pm-tt"),txt=cp.dataset.copy,M=bioModelo(),L=[];
+  pm.querySelectorAll(".pm-th").forEach(e=>L.push(e.querySelector("img.c2ph")));
+  const K=3,W=360,c0=document.createElement("canvas").getContext("2d");
+  const H=Math.ceil(bioDibuja(c0,tt,txt,M,L,true))+16;
+  const cv=document.createElement("canvas");cv.width=W*K;cv.height=H*K;
+  const c=cv.getContext("2d");c.scale(K,K);
+  c.fillStyle="#EBDDC5";c.fillRect(0,0,W,H);
+  c.save();bioRR(c,16,16,W-32,H-32,26);c.fillStyle="#fff";c.fill();c.lineWidth=3;c.strokeStyle="#614a3e";c.stroke();c.clip();
+  bioDibuja(c,tt,txt,M,L,false);
+  c.restore();
+  const blob=await new Promise(ok=>cv.toBlob(ok,"image/png"));
+  if(!blob){toast("No se pudo guardar la imagen");return}
+  const nombre="fam-studio-mi-perfil-"+(tt?"tiktok":"instagram")+".png";
+  const f=new File([blob],nombre,{type:"image/png"});
+  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}}
+  catch(e){if(e&&e.name==="AbortError")return}
+  const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=nombre;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+  toast("Imagen guardada");
+}
 function bioSet(n,v){
   const a=PIG.a;
   if(n==="quien"){a.quien=v;if(!bioHas(bioTemas(v),a.tema))a.tema=""}
@@ -2772,12 +3056,12 @@ document.addEventListener("click",e=>{
    case "q":case "pal":{
     const was=bioDone(a);
     if(d.bk==="pal")a.palabra=d.bv;else if(!bioSet(d.bn,d.bv))return;
-    PIG.vs=[0,0,0,0,0,0];PIG.pv=[0,0,0,0,0,0];bioSave();render(true);
+    PIG.vs=[0,0,0,0,0,0];PIG.pv=[0,0,0,0,0,0];PIG.ci=0;bioSave();render(true);
     if(!was&&bioDone(a)&&(!PIG.ok||PIG.edit)){const r=document.getElementById("bio_res");if(r)r.scrollIntoView({behavior:"smooth",block:"start"})}
     break}
    case "otra":{
-    const i=+d.bi;PIG.vs[i]=(PIG.vs[i]+1)%BIO_NVER;
-    const o=document.getElementById("bio_out");if(o)o.innerHTML=bioCards();
+    const i=+d.bi;PIG.vs[i]=(PIG.vs[i]+1)%BIO_NVER;PIG.ci=i;
+    const o=document.getElementById("bio_out");if(o)o.innerHTML=bioCards();bioPos();if(typeof FOTOS!=="undefined")FOTOS.scan();
     const b=document.querySelector('[data-bk="otra"][data-bi="'+i+'"]');if(b)b.focus();
     break}
    case "pre":{
@@ -2806,7 +3090,7 @@ document.addEventListener("click",e=>{
     a.zd=znL(PIG.zt!=null?PIG.zt:a.ciudad).trim();bioSave();bioZonaBox();break}
    case "mia":{
     const b=bioSeis(a)[+d.bi];if(!b)return;
-    PIG.ok={txt:b.txt,est:b.l};ls("fs_bio_ok",PIG.ok);PIG.edit=false;
+    PIG.ok={txt:b.txt,sin:b.sin,con:b.con,est:b.l};ls("fs_bio_ok",PIG.ok);PIG.edit=false;
     toast("Guardada como tu bio");render();
     break}
    case "cambiar":PIG.edit=true;render();break;
@@ -2815,9 +3099,12 @@ document.addEventListener("click",e=>{
     bioRefresh();
     const b=document.querySelector('[data-bk="'+d.bk+'"][data-bv="'+d.bv+'"]');if(b)b.focus();
     break}
+   case "sl":bioIr(PIG.ci+(+d.bv));break;
+   case "img":bioGuardaImg(t);break;
+   case "ver":{const r=document.getElementById("bio_res");if(r){try{r.scrollIntoView({behavior:"smooth",block:"start"})}catch(x){r.scrollIntoView()}}break}
    case "tto":{
     PIG.tv=(PIG.tv+1)%BIO_NVER;
-    const o=document.getElementById("bio_out");if(o)o.innerHTML=bioTTCard();
+    const o=document.getElementById("bio_out");if(o)o.innerHTML=bioTTCard();if(typeof FOTOS!=="undefined")FOTOS.scan();
     const b=document.querySelector('[data-bk="tto"]');if(b)b.focus();
     break}
    case "rvab":case "rvgo":case "rvx":case "rvnew":case "rvkeep":bioRevClick(d.bk);break;
@@ -2836,7 +3123,7 @@ function bioRevClick(k){
     Object.keys(p).forEach(x=>{m[x]=p[x]});
     if(p.quien&&!bioHas(bioTemas(p.quien),m.tema))m.tema="";
     PIG.a=bioSane(m);PIG.rv=null;if(PIG.ok)PIG.edit=true;
-    PIG.vs=[0,0,0,0,0,0];PIG.pv=[0,0,0,0,0,0];bioSave();render();
+    PIG.vs=[0,0,0,0,0,0];PIG.pv=[0,0,0,0,0,0];PIG.ci=0;bioSave();render();
     toast(Object.keys(p).length?"He marcado lo que dice tu bio. Revisa y completa el resto":"No he podido deducir nada: contesta las preguntas");
     const f=document.querySelector(".bio-form");if(f)f.scrollIntoView({behavior:"smooth",block:"start"});
   }
@@ -2844,7 +3131,7 @@ function bioRevClick(k){
     const t=PIG.rv.txt.trim();
     if(t){
       if(t.length>BIO_MAX){toast("Tiene más de "+BIO_MAX+" caracteres: acórtala y vuelve a revisarla");return}
-      PIG.ok={txt:t,est:""};ls("fs_bio_ok",PIG.ok);PIG.edit=false;toast("Guardada como tu bio");
+      PIG.ok=bioOk({txt:t,est:""});ls("fs_bio_ok",PIG.ok);PIG.edit=false;toast("Guardada como tu bio");
     }
     PIG.rv=null;render();
   }
@@ -6102,7 +6389,7 @@ function load(){
   x.forEach(c=>{
     if(!c||typeof c!=="object"||typeof c.id!=="string"||!/^[A-Za-z0-9_-]{1,30}$/.test(c.id))return;
     const n=limpia(c.n,ALIAS_MAX);if(!n)return;
-    out.push({id:c.id,n,f:RX_DIA.test(c.f)?c.f:hoyK(),ref:/^(pk|g|e|o):[A-Za-z0-9_-]{1,60}$/.test(c.ref||"")?c.ref:"",pg:/^(clientas|proyecto)_[a-z0-9-]{1,60}$/.test(c.pg||"")?c.pg:"",q:limpia(c.q,140),kw:limpia(c.kw,15),s:Number.isInteger(c.s)&&c.s>=0&&c.s<=4?c.s:0,nota:limpia(c.nota,NOTA_MAX)});
+    out.push({id:c.id,n,f:RX_DIA.test(c.f)?c.f:hoyK(),ref:/^(pk|g|e|o):[A-Za-z0-9_-]{1,60}$/.test(c.ref||"")?c.ref.replace(/^g:(.+)$/,(m,i)=>"g:"+guiaId(i)):"",pg:/^(clientas|proyecto)_[a-z0-9-]{1,60}$/.test(c.pg||"")?c.pg:"",q:limpia(c.q,140),kw:limpia(c.kw,15),s:Number.isInteger(c.s)&&c.s>=0&&c.s<=4?c.s:0,nota:limpia(c.nota,NOTA_MAX)});
   });
   return out.slice(0,MAXC);
 }
@@ -6409,14 +6696,14 @@ A11Y.init();
 
 // ===== Fam Studio · navegación, inicio, instalación y administración =====
 const NAV=[["home","Inicio"],["crear","Crear"],["semana","Semana"],["recursos","Recursos"],["equipo","Equipo"],["mas","Más"]];
-const PARENT={contactos:"recursos",objeciones:"recursos",obj_det:"objeciones",funciona:"semana",situaciones:"crear",ganchos:"crear",cuadricula:"crear",revisor:"crear",normas:"crear",numeros:"semana",perfil_ig:"home",tt_live:"home",tt_historia:"home",tt_respuestas:"home",tt_bio:"home",guia:"mas",ayuda:"mas",perfil:"mas",instalar:"mas",admin:"mas",negocio:"equipo",guia_det:"recursos",eq_prospectar:"equipo",eq_beauty:"equipo",eq_reto:"equipo",eq_embarazo:"equipo",eq_morning:"equipo",eq_semana:"equipo",eq_calendario:"equipo",eq_formaciones:"equipo",eq_guias:"equipo",eq_herramientas:"equipo",eq_paises:"equipo",eq_terminos:"equipo",eq_presentar:"equipo",eq_ventas:"equipo",eq_normas:"equipo"};
+const PARENT={contactos:"recursos",objeciones:"recursos",obj_det:"objeciones",funciona:"semana",situaciones:"crear",ganchos:"crear",cuadricula:"crear",revisor:"crear",normas:"crear",numeros:"semana",perfil_ig:"home",tt_live:"home",tt_historia:"home",tt_respuestas:"home",tt_bio:"home",guia:"mas",ayuda:"mas",perfil:"mas",instalar:"mas",admin:"mas",negocio:"equipo",guia_det:"recursos",sit_mini:"recursos",eq_prospectar:"equipo",eq_beauty:"equipo",eq_reto:"equipo",eq_embarazo:"equipo",eq_morning:"equipo",eq_semana:"equipo",eq_calendario:"equipo",eq_formaciones:"equipo",eq_guias:"equipo",eq_herramientas:"equipo",eq_paises:"equipo",eq_terminos:"equipo",eq_presentar:"equipo",eq_ventas:"equipo",eq_normas:"equipo"};
 const parentOf=t=>PARENT[t];
 const isStandalone=()=>{try{return window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}};
 const platform=()=>{const u=navigator.userAgent||"";if(/iPhone|iPad|iPod/i.test(u)||(/Macintosh/.test(u)&&"ontouchend" in document))return "ios";if(/Android/i.test(u))return "android";return "otro"};
 
 // «Atrás» vuelve de donde vienes: S.hist guarda las pantallas por las que has pasado (se vacía al tocar la barra de abajo
 // o si alguien cambia S.tab sin pasar por go()); sin historial vuelve a la pantalla «madre» (PARENT).
-const NOMBRE={home:"Inicio",crear:"Crear",semana:"Semana",recursos:"Recursos",equipo:"Equipo",mas:"Más",contactos:"Mis contactos",objeciones:"Qué contestar cuando te dicen…",obj_det:"la pega",funciona:"Lo que te funciona",situaciones:"Situaciones",ganchos:"Ganchos",cuadricula:"Cuadrícula",revisor:"Revisor",guia:"Guía del método",ayuda:"Cómo se usa",perfil:"Mi cuenta",instalar:"Instalar",admin:"Administración",negocio:"Mi proyecto",perfil_ig:"Tu bio",numeros:"Mis números",guia_det:"la guía",normas:"Lo que no se dice",tt_historia:"Mi historia",tt_respuestas:"Responder comentarios",tt_bio:"Mi bio de TikTok",tt_live:"TikTok LIVE",eq_prospectar:"Prospectar",eq_beauty:"Mi Beauty Party",eq_reto:"Reto 21 días",eq_morning:"Morning Glow",eq_embarazo:"Complementos y embarazo",eq_semana:"Tus primeros siete días en el equipo",eq_calendario:"Calendario",eq_formaciones:"Formaciones",eq_guias:"Guías y plantillas",eq_herramientas:"Herramientas",eq_paises:"Países y kits",eq_terminos:"Términos",eq_presentar:"Cómo presentar",eq_ventas:"Vender",eq_normas:"Normas"};
+const NOMBRE={home:"Inicio",crear:"Crear",semana:"Semana",recursos:"Recursos",equipo:"Equipo",mas:"Más",contactos:"Mis contactos",objeciones:"Qué contestar cuando te dicen…",obj_det:"la pega",funciona:"Lo que te funciona",situaciones:"Situaciones",ganchos:"Ganchos",cuadricula:"Cuadrícula",revisor:"Revisor",guia:"Guía del método",ayuda:"Cómo se usa",perfil:"Mi cuenta",instalar:"Instalar",admin:"Administración",negocio:"Mi proyecto",perfil_ig:"Tu bio",numeros:"Mis números",guia_det:"la guía",sit_mini:"la mini guía",normas:"Lo que no se dice",tt_historia:"Mi historia",tt_respuestas:"Responder comentarios",tt_bio:"Mi bio de TikTok",tt_live:"TikTok LIVE",eq_prospectar:"Prospectar",eq_beauty:"Mi Beauty Party",eq_reto:"Reto 21 días",eq_morning:"Morning Glow",eq_embarazo:"Complementos y embarazo",eq_semana:"Tus primeros siete días en el equipo",eq_calendario:"Calendario",eq_formaciones:"Formaciones",eq_guias:"Guías y plantillas",eq_herramientas:"Herramientas",eq_paises:"Países y kits",eq_terminos:"Términos",eq_presentar:"Cómo presentar",eq_ventas:"Vender",eq_normas:"Normas"};
 function backDe(tab){
   const H=S.hist||[];const t=H.length?H[H.length-1]:null;
   if(t&&t!==tab&&VIEWS[t])return t;
@@ -6442,6 +6729,8 @@ function render(keep){
   if(keep)window.scrollTo(0,y);else{window.scrollTo(0,0);VIS.entra()}
   {const tb=document.getElementById("bp_tabs"); // pestañas de Mi Beauty Party: la activa se ve (centrada) y el degradado del borde avisa de que hay más
    if(tb){const on=tb.querySelector(".on");if(on)tb.scrollLeft=on.offsetLeft-(tb.clientWidth-on.offsetWidth)/2;const f=()=>tb.classList.toggle("fin",tb.scrollLeft+tb.clientWidth>=tb.scrollWidth-4);tb.addEventListener("scroll",f,{passive:true});f()}}
+  {const rt=document.getElementById("rc_temas"); // Recursos › Guías: el tema elegido se ve en la fila de temas (que se desliza)
+   if(rt){const on=rt.querySelector(".on");if(on)rt.scrollLeft=on.offsetLeft-(rt.clientWidth-on.offsetWidth)/2}}
   if(S.anc){const a=document.getElementById(S.anc);S.anc="";if(a)try{a.scrollIntoView({block:"start"})}catch(e){}} // accesos que llevan a un apartado concreto (data-anc)
 }
 
